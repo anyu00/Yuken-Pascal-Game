@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pascal's Law Adventure</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>🌊 Pascal's Law Adventure</h1>
+            <p class="subtitle">Learn how pressure works in fluids!</p>
+        </header>
+
+        <section id="game-area">
+            <div id="hydraulic-sim">
+                <div class="piston-container left">
+                    <div class="piston-label">Push Me!</div>
+                    <div class="piston" id="left-piston">
+                        <button id="push-btn">⬇ Push</button>
+                    </div>
+                    <div class="cylinder left-cylinder">
+                        <div class="fluid" id="left-fluid"></div>
+                    </div>
+                </div>
+
+                <div class="tube-connector">
+                    <div class="tube" id="tube">
+                        <div class="pressure-wave" id="pressure-wave"></div>
+                    </div>
+                    <div class="tube-label">Fluid Tube</div>
+                </div>
+
+                <div class="piston-container right">
+                    <div class="piston-label">Watch me rise!</div>
+                    <div class="piston" id="right-piston">🏋️</div>
+                    <div class="cylinder right-cylinder">
+                        <div class="fluid" id="right-fluid"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="pressure-display">
+                <div class="pressure-box">
+                    <span class="pressure-icon">💧</span>
+                    <span>Pressure: <strong id="pressure-value">0</strong> units</span>
+                </div>
+                <div class="law-display" id="law-text">
+                    Press the button to apply force!
+                </div>
+            </div>
+        </section>
+
+        <section id="score-section">
+            <div id="quiz-area">
+                <h2>🧠 Quick Quiz!</h2>
+                <div id="quiz-question"></div>
+                <div id="quiz-options"></div>
+                <div id="quiz-feedback"></div>
+            </div>
+            <div id="score-board">
+                <span>⭐ Score: <strong id="score">0</strong></span>
+                <button id="next-btn" style="display:none">Next Question ➡</button>
+            </div>
+        </section>
+
+        <section id="fun-fact">
+            <h3>💡 Did You Know?</h3>
+            <p id="fact-text">Click the push button to start your Pascal's Law adventure!</p>
+        </section>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
