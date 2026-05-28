@@ -1,208 +1,882 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>Pascal's Law — Yuken</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>🐱 Save Fluffy! – Pascal's Pressure Race</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+  <style>
+    /* ─── BRAND / EDIT THESE ─────────────────────────────────── */
+    :root {
+      --brand-name:   "YUKEN";
+      --brand-color:  #D22F2F;
+      --brand-url:    "https://www.yuken.co.jp";
+    }
+    /* ─── SPONGEBOB PALETTE ───────────────────────────────────── */
+    :root {
+      --yellow:   #FFE135;
+      --coral:    #FF6B6B;
+      --teal:     #06B6D4;
+      --sky:      #7EC8E3;
+      --green:    #22C55E;
+      --dkgreen:  #16A34A;
+      --orange:   #F97316;
+      --purple:   #A855F7;
+      --pink:     #EC4899;
+      --road:     #374151;
+      --black:    #1C1C1E;
+      --white:    #FFFFFF;
+    }
+
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{
+      font-family:'Fredoka One','Nunito',system-ui,sans-serif;
+      background:var(--sky);
+      height:100vh;overflow:hidden;
+      user-select:none;-webkit-user-select:none;
+    }
+    #game{position:relative;width:100vw;height:100vh;overflow:hidden;}
+
+    /* ══════════════════════════════════════════
+       SCREENS
+    ══════════════════════════════════════════ */
+    .screen{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;}
+    .screen.active{display:flex;}
+
+    /* ══════════════════════════════════════════
+       TITLE SCREEN
+    ══════════════════════════════════════════ */
+    #s-title{
+      background:linear-gradient(180deg,#7EC8E3 0%,#B0E8FF 55%,var(--green) 55%,var(--dkgreen) 100%);
+    }
+    .t-sun{position:absolute;top:14px;right:50px;font-size:4.5rem;animation:sunSpin 25s linear infinite;z-index:1;}
+    @keyframes sunSpin{to{transform:rotate(360deg)}}
+
+    .t-card{
+      background:var(--yellow);
+      border:4px solid var(--black);
+      border-radius:28px;
+      padding:28px 32px 24px;
+      text-align:center;
+      box-shadow:7px 7px 0 var(--black);
+      max-width:360px;width:92%;z-index:10;
+      animation:popIn .6s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes popIn{from{transform:scale(0) rotate(-6deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
+
+    .t-icon{font-size:3.8rem;display:block;animation:wiggle 2s ease-in-out infinite;}
+    .t-title{font-size:2.6rem;color:var(--black);line-height:1;margin:6px 0;text-shadow:3px 3px 0 rgba(0,0,0,.15);}
+    .t-sub{font-size:1rem;color:var(--coral);margin-bottom:10px;font-weight:900;}
+    .t-story{
+      font-size:.85rem;color:#333;
+      background:white;border:2px solid var(--black);
+      border-radius:12px;padding:8px 12px;margin:8px 0 14px;
+      line-height:1.5;
+    }
+    .t-story strong{color:var(--coral);}
+
+    .btn{
+      display:block;width:100%;
+      border:3px solid var(--black);border-radius:40px;
+      padding:13px 28px;cursor:pointer;
+      font-family:'Fredoka One',sans-serif;font-size:1.3rem;color:white;
+      box-shadow:4px 4px 0 var(--black);
+      transition:transform .1s,box-shadow .1s;
+    }
+    .btn:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--black);}
+    .btn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--black);}
+    .btn-go{background:var(--coral);animation:pulse 1.6s ease-in-out infinite;}
+    .btn-ja{background:var(--teal);margin-top:8px;font-size:1.1rem;}
+    @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+    .btn-go:hover,.btn-go:active{animation:none;}
+    .brand-title{
+      position:absolute;top:10px;left:12px;
+      font-size:.75rem;font-weight:900;color:white;
+      background:var(--brand-color);
+      border:2px solid var(--black);border-radius:8px;
+      padding:3px 8px;box-shadow:2px 2px 0 var(--black);
+      text-decoration:none;z-index:20;
+    }
+
+    /* ══════════════════════════════════════════
+       RACE SCREEN
+    ══════════════════════════════════════════ */
+    #s-race{flex-direction:column;background:var(--sky);}
+
+    /* HUD */
+    #hud{
+      position:absolute;top:0;left:0;right:0;z-index:100;
+      background:rgba(255,255,255,.93);
+      border-bottom:3px solid var(--black);
+      padding:6px 12px;display:flex;flex-direction:column;gap:4px;
+    }
+    .hud-bar{display:flex;align-items:center;gap:8px;}
+    #prog-bg{
+      flex:1;height:22px;
+      background:#e5e7eb;border:2px solid var(--black);border-radius:11px;overflow:hidden;position:relative;
+    }
+    #prog-fill{
+      height:100%;border-radius:11px;
+      background:linear-gradient(90deg,var(--teal),var(--green));
+      width:0%;transition:width .9s cubic-bezier(.34,1.56,.64,1);
+    }
+    #prog-kart{
+      position:absolute;top:50%;left:0%;
+      transform:translate(-50%,-50%);font-size:1rem;
+      transition:left .9s cubic-bezier(.34,1.56,.64,1);pointer-events:none;
+    }
+    .hud-icon{font-size:1.1rem;}
+    .hud-row2{display:flex;justify-content:space-between;align-items:center;}
+    #lives-el{font-size:1.2rem;letter-spacing:2px;}
+    #q-counter{font-size:.85rem;color:var(--purple);font-weight:900;}
+    #score-el{font-size:.85rem;font-weight:900;}
+
+    /* Race world */
+    #world{
+      position:absolute;top:68px;left:0;right:0;bottom:0;
+      overflow:hidden;
+    }
+    .sky-bg{
+      position:absolute;top:0;left:0;right:0;height:46%;
+      background:linear-gradient(180deg,#7EC8E3 0%,#B8E8FF 100%);
+    }
+    .ground-bg{
+      position:absolute;bottom:0;left:0;right:0;height:35%;
+      background:var(--green);
+      border-top:3px solid var(--dkgreen);
+    }
+    .road-bg{
+      position:absolute;left:0;right:0;
+      top:calc(46% - 28px);height:88px;
+      background:var(--road);
+      border-top:3px solid #4B5563;
+      border-bottom:3px solid #4B5563;
+    }
+
+    /* Dashes */
+    #dashes{
+      position:absolute;left:0;right:0;
+      top:calc(46% + 14px);height:8px;
+      overflow:hidden;pointer-events:none;
+    }
+    .dtrack{display:flex;gap:0;animation:dashMove .4s linear infinite;}
+    @keyframes dashMove{from{transform:translateX(0)}to{transform:translateX(-60px)}}
+    .dash{width:40px;height:8px;background:var(--yellow);border-radius:4px;margin-right:20px;flex-shrink:0;}
+    #dashes.fast .dtrack{animation-duration:.15s;}
+    #dashes.slow .dtrack{animation-duration:.9s;}
+
+    /* Clouds */
+    .cloud{position:absolute;animation:cloudMove linear infinite;z-index:2;}
+    @keyframes cloudMove{from{left:108%}to{left:-18%}}
+
+    /* Trees */
+    .tree{position:absolute;animation:objMove linear infinite;z-index:3;font-size:2.4rem;}
+    .tree.hi{top:calc(40% - 48px);}
+    .tree.lo{bottom:calc(35% - 8px);}
+    @keyframes objMove{from{left:108%}to{left:-10%}}
+
+    /* Yuken signs */
+    .sign{
+      position:absolute;bottom:calc(35% + 8px);
+      animation:objMove linear infinite;z-index:3;
+    }
+    .sign-inner{
+      background:var(--brand-color);border:3px solid var(--black);
+      border-radius:8px;padding:3px 8px;
+      font-size:.7rem;font-weight:900;color:white;
+      box-shadow:2px 2px 0 var(--black);white-space:nowrap;
+    }
+    .sign-pole{width:4px;height:18px;background:#888;margin:0 auto;}
+
+    /* Kart */
+    #kart{
+      position:absolute;left:16%;top:46%;
+      font-size:3rem;z-index:10;
+      animation:kartBounce .35s ease-in-out infinite;
+      transform-origin:bottom center;
+      cursor:default;
+    }
+    @keyframes kartBounce{
+      0%,100%{transform:translateY(0)}
+      50%{transform:translateY(-6px)}
+    }
+    #kart.boosting{animation:kartBoost .15s ease-in-out infinite;}
+    @keyframes kartBoost{0%,100%{transform:translateY(-8px) scaleX(1.1)}50%{transform:translateY(0) scaleX(1)}}
+    #kart.shaking{animation:kartShake .45s ease !important;}
+    @keyframes kartShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+
+    /* Speed lines */
+    .speedline{
+      position:absolute;height:3px;border-radius:2px;
+      background:linear-gradient(90deg,transparent,var(--yellow));
+      pointer-events:none;z-index:9;
+      animation:sline .3s linear forwards;
+    }
+    @keyframes sline{from{width:55px;opacity:1;transform:translateX(0)}to{width:0;opacity:0;transform:translateX(-70px)}}
+
+    /* Fluffy */
+    #fluffy{
+      position:absolute;right:6%;top:42%;
+      font-size:3.2rem;z-index:8;text-align:center;
+      animation:fluffyDance 2s ease-in-out infinite;
+    }
+    .fluffy-lbl{
+      font-size:.7rem;font-weight:900;color:var(--black);
+      background:white;border:2px solid var(--black);
+      border-radius:7px;padding:1px 5px;margin-top:2px;text-align:center;
+    }
+    @keyframes fluffyDance{0%,100%{transform:translateY(0) rotate(0)}33%{transform:translateY(-10px) rotate(-12deg)}66%{transform:translateY(-5px) rotate(12deg)}}
+    #fluffy.celebrating{animation:fluffyCelebrate .4s ease-in-out infinite;}
+    @keyframes fluffyCelebrate{0%,100%{transform:scale(1) rotate(0)}50%{transform:scale(1.3) rotate(15deg)}}
+
+    /* Flash overlay */
+    #flash{position:absolute;inset:0;pointer-events:none;z-index:60;opacity:0;}
+    #flash.go{animation:flashAnim .65s ease forwards;}
+    @keyframes flashAnim{0%{opacity:0}20%{opacity:.7;background:var(--yellow)}100%{opacity:0;background:transparent}}
+
+    /* Backdrop */
+    #backdrop{
+      display:none;position:absolute;inset:0;
+      background:rgba(0,0,0,.48);
+      backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+      z-index:150;
+    }
+
+    /* ══════════════════════════════════════════
+       QUESTION PANEL
+    ══════════════════════════════════════════ */
+    #qpanel{
+      position:absolute;left:50%;top:50%;
+      transform:translate(-50%,-50%) scale(0);
+      transition:transform .4s cubic-bezier(.34,1.56,.64,1);
+      width:92%;max-width:480px;
+      background:white;border:4px solid var(--black);border-radius:26px;
+      padding:20px;z-index:200;
+      box-shadow:8px 8px 0 var(--black);text-align:center;
+      display:none;
+    }
+    #qpanel.open{display:block;}
+    #qpanel.open.show{transform:translate(-50%,-50%) scale(1);}
+
+    .qhdr{
+      border:3px solid var(--black);border-radius:14px;
+      padding:7px 12px;margin-bottom:12px;
+      color:white;font-size:1.05rem;
+    }
+    .qtimer-wrap{height:7px;background:#e5e7eb;border-radius:4px;border:1.5px solid #ccc;overflow:hidden;margin-bottom:12px;}
+    .qtimer-bar{height:100%;background:linear-gradient(90deg,var(--green),var(--orange),var(--coral));border-radius:4px;width:100%;transition:width linear;}
+
+    .qformula{
+      background:var(--yellow);border:3px solid var(--black);
+      border-radius:12px;padding:10px;margin:8px 0;
+    }
+    .qvalues{font-size:.9rem;color:#555;margin-bottom:4px;}
+    .qbig{font-size:1.7rem;color:var(--black);}
+    .qask{font-size:1rem;color:var(--black);margin:8px 0 4px;}
+
+    .qopts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;}
+    .qbtn{
+      background:var(--coral);border:3px solid var(--black);border-radius:14px;
+      padding:11px 6px;font-family:'Fredoka One',sans-serif;font-size:1.3rem;color:white;
+      cursor:pointer;box-shadow:3px 3px 0 var(--black);
+      transition:transform .1s,box-shadow .1s,background .15s;
+    }
+    .qbtn:not(:disabled):hover{transform:translate(-1px,-2px);box-shadow:4px 5px 0 var(--black);}
+    .qbtn:not(:disabled):active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);}
+    .qbtn.ok{background:var(--green) !important;}
+    .qbtn.no{animation:btnShake .35s ease;}
+    @keyframes btnShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px) rotate(-3deg)}75%{transform:translateX(8px) rotate(3deg)}}
+    .qbtn:disabled{cursor:default;}
+
+    .qhint{
+      display:none;font-size:.85rem;color:#555;
+      background:#f3f4f6;border-radius:8px;padding:6px;margin-top:10px;
+    }
+    .qhint.show{display:block;}
+
+    /* ══════════════════════════════════════════
+       STARS / SPARKS
+    ══════════════════════════════════════════ */
+    .spark{
+      position:fixed;pointer-events:none;z-index:300;
+      animation:sparkPop .8s ease forwards;
+    }
+    @keyframes sparkPop{0%{transform:scale(0) rotate(0);opacity:1}100%{transform:scale(3) rotate(200deg);opacity:0}}
+
+    .confetti{
+      position:fixed;pointer-events:none;z-index:400;
+      animation:confFall linear forwards;
+    }
+    @keyframes confFall{0%{transform:translateY(-10px) rotate(0) scale(1);opacity:1}100%{transform:translateY(100vh) rotate(720deg) scale(.4);opacity:0}}
+
+    /* ══════════════════════════════════════════
+       WIN SCREEN
+    ══════════════════════════════════════════ */
+    #s-win{background:linear-gradient(180deg,#87CEEB 0%,var(--green) 60%);}
+    .wbox{
+      background:var(--yellow);border:4px solid var(--black);border-radius:26px;
+      padding:30px;box-shadow:8px 8px 0 var(--black);
+      max-width:380px;width:92%;text-align:center;
+      animation:popIn .6s cubic-bezier(.34,1.56,.64,1);
+    }
+    .wicon{font-size:4.5rem;display:block;animation:wiggle 1s ease-in-out infinite;}
+    .wtitle{font-size:2.3rem;color:var(--black);margin:8px 0;}
+    .wsub{font-size:.95rem;color:#444;margin-bottom:12px;}
+    .wscore{background:var(--teal);border:3px solid var(--black);border-radius:12px;padding:9px;font-size:1.4rem;color:white;margin:8px 0;}
+    .wlesson{background:white;border:2px solid var(--black);border-radius:12px;padding:10px;font-size:.88rem;color:var(--black);margin:8px 0;line-height:1.6;}
+
+    /* ══════════════════════════════════════════
+       LOSE SCREEN
+    ══════════════════════════════════════════ */
+    #s-lose{background:linear-gradient(180deg,#FF8A65 0%,#FF6B6B 100%);}
+    .lbox{
+      background:white;border:4px solid var(--black);border-radius:26px;
+      padding:30px;box-shadow:8px 8px 0 var(--black);
+      max-width:340px;width:92%;text-align:center;
+      animation:popIn .6s cubic-bezier(.34,1.56,.64,1);
+    }
+    .licon{font-size:4rem;display:block;animation:wiggle 1s ease-in-out infinite;}
+    .ltitle{font-size:2rem;color:var(--black);margin:8px 0;}
+    .lhint{
+      font-size:.88rem;color:#555;
+      background:#FFF3E0;border:2px solid var(--orange);
+      border-radius:10px;padding:8px;margin:10px 0;
+    }
+
+    /* shared anims */
+    @keyframes wiggle{0%,100%{transform:rotate(0) scale(1)}25%{transform:rotate(-8deg) scale(1.1)}75%{transform:rotate(8deg) scale(1.1)}}
+
+    @media(max-width:380px){
+      .t-title{font-size:2.1rem;}
+      #kart{font-size:2.3rem;}
+      #fluffy{font-size:2.4rem;}
+      .qbtn{font-size:1.1rem;padding:9px 4px;}
+      .qbig{font-size:1.4rem;}
+    }
+  </style>
 </head>
 <body>
+<div id="game">
 
-<!-- ─── GLOBAL HEADER ───────────────────────────────────────── -->
-<header class="game-header" id="game-header">
-  <a href="#" id="brand-logo-link" target="_blank" rel="noopener" class="brand-logo-wrap">
-    <img id="brand-logo-img" src="assets/yuken-logo.svg"
-         onerror="this.style.display='none'" alt="Yuken" />
-    <span class="brand-name">Yuken</span>
-  </a>
-  <div class="header-center">
-    <span class="brand-tagline" id="brand-tagline">Hydraulics for Life</span>
-  </div>
-  <button class="lang-btn" id="lang-btn">🇯🇵 日本語</button>
-</header>
+  <!-- ═══════════ TITLE SCREEN ═══════════ -->
+  <div class="screen active" id="s-title">
+    <a class="brand-title" href="https://www.yuken.co.jp" target="_blank">⚙️ YUKEN</a>
+    <div class="t-sun">☀️</div>
 
-<!-- ─── SCREEN: MENU ────────────────────────────────────────── -->
-<section class="screen active" id="screen-menu">
-  <div class="menu-wrap">
-    <div class="title-block">
-      <div class="title-hero">
-        <span class="title-p">P</span><span class="title-eq"> = </span>
-        <span class="title-f">F</span><span class="title-div">÷</span>
-        <span class="title-a">A</span>
+    <div class="t-card">
+      <span class="t-icon">🏎️💨</span>
+      <h1 class="t-title">Save Fluffy!</h1>
+      <p class="t-sub">Pascal's Pressure Race ⚡</p>
+
+      <div style="display:flex;justify-content:center;gap:12px;margin:8px 0;font-size:2.2rem">
+        <span style="animation:wiggle 1.5s .2s ease-in-out infinite;display:inline-block">😱🐱</span>
+        <span style="align-self:center;font-size:1.2rem">→</span>
+        <span style="animation:wiggle 1.5s .6s ease-in-out infinite;display:inline-block">😸🐱</span>
       </div>
-      <h1 class="game-title">Pascal's Law</h1>
-      <p class="game-subtitle">
-        Save Yukentopia from <strong class="villain-text">SQUISH</strong>
-        &amp; master hydraulics!
+
+      <p class="t-story">
+        🦹 <strong>SQUISH the villain</strong> squashed Fluffy the cat flat! 🥞<br>
+        Race to rescue her using the power of<br>
+        <strong>P = F ÷ A &nbsp;(Pascal's Law!)</strong> 💪<br>
+        Answer correctly → <strong>TURBO BOOST!</strong> 🚀
       </p>
-    </div>
 
-    <div class="menu-characters">
-      <div class="menu-char pascal-idle" id="menu-pascal">
-        <div class="menu-char-emoji">🧑‍🔬</div>
-        <div class="menu-char-name">Pascal</div>
-      </div>
-      <div class="menu-vs">VS</div>
-      <div class="menu-char squish-idle" id="menu-squish">
-        <div class="menu-char-emoji">🫧</div>
-        <div class="menu-char-name villain-text">SQUISH</div>
-      </div>
-    </div>
-
-    <div class="menu-buttons">
-      <button class="btn-primary" id="btn-start" data-key="startBtn">
-        🚀 Start the Adventure!
-      </button>
-      <button class="btn-secondary" id="btn-sim-only" data-key="tryBtn">
-        🔬 Jump to Lab
-      </button>
-    </div>
-
-    <div class="menu-footer">
-      <span data-key="poweredBy">Powered by</span>
-      <a id="menu-brand-link" href="#" target="_blank" rel="noopener" class="menu-brand-link">
-        <img id="menu-logo-sm" src="assets/yuken-logo.svg"
-             onerror="this.style.display='none'" alt="Yuken" />
-        <strong>Yuken</strong>
-      </a>
+      <button class="btn btn-go" id="btn-en">🚀 START RACING!</button>
+      <button class="btn btn-ja" id="btn-ja">🎌 日本語でプレイ</button>
     </div>
   </div>
 
-  <!-- Floating particles background -->
-  <div class="particles" id="particles"></div>
-</section>
-
-<!-- ─── SCREEN: STORY ────────────────────────────────────────── -->
-<section class="screen" id="screen-story">
-  <div class="story-wrap">
-
-    <!-- Scene progress dots -->
-    <div class="story-progress-bar">
-      <div class="story-dots" id="story-dots"></div>
-      <button class="btn-skip" id="btn-skip-story" data-key="skipStory">
-        Skip Story →
-      </button>
-    </div>
-
-    <!-- Scene title -->
-    <div class="story-scene-title" id="story-scene-title">Scene Title</div>
-
-    <!-- Scene background icon -->
-    <div class="scene-bg-icon" id="scene-bg-icon">🏙️</div>
-
-    <!-- Character stage -->
-    <div class="character-stage" id="character-stage">
-      <!-- Characters rendered here by story.js -->
-    </div>
-
-    <!-- Speech bubble -->
-    <div class="speech-bubble-wrap">
-      <div class="speech-speaker" id="story-speaker-name">Pascal</div>
-      <div class="speech-bubble">
-        <p class="speech-text" id="story-speech">…</p>
-      </div>
-    </div>
-
-    <!-- Navigation -->
-    <button class="btn-next-line" id="btn-next-line">Next →</button>
-
-  </div>
-</section>
-
-<!-- ─── SCREEN: SIMULATOR ────────────────────────────────────── -->
-<section class="screen" id="screen-simulator">
-  <div class="sim-wrap">
-
-    <div class="sim-header">
-      <h1 class="sim-title" data-key="simulatorTitle">🔬 Pascal's Lab</h1>
-      <p class="sim-sub" data-key="simulatorSub">Pick an experiment and try it yourself!</p>
-    </div>
-
-    <!-- Demo cards grid -->
-    <div id="demos-grid-wrap" style="display:flex;flex-direction:column;align-items:center;width:100%;">
-      <div class="demos-grid" id="demos-grid">
-        <!-- Rendered by simulator.js -->
-      </div>
-
-      <!-- Brand products strip -->
-      <div class="brand-strip">
-        <p class="brand-strip-label" data-key="poweredBy">Powered by</p>
-        <div class="brand-products" id="brand-products">
-          <!-- Rendered by simulator.js -->
+  <!-- ═══════════ RACE SCREEN ═══════════ -->
+  <div class="screen" id="s-race">
+    <!-- HUD -->
+    <div id="hud">
+      <div class="hud-bar">
+        <span class="hud-icon">🏎️</span>
+        <div id="prog-bg">
+          <div id="prog-fill"></div>
+          <div id="prog-kart">🏎️</div>
         </div>
+        <span class="hud-icon">🐱</span>
+      </div>
+      <div class="hud-row2">
+        <div id="lives-el">❤️❤️❤️</div>
+        <div id="q-counter">Q <span id="q-num">1</span>/5</div>
+        <div id="score-el">⭐ <span id="score-num">0</span></div>
       </div>
     </div>
 
-    <!-- Active demo panel (hidden by default) -->
-    <div class="demo-panel" id="demo-panel" style="display:none;">
-      <!-- Filled dynamically -->
+    <!-- World -->
+    <div id="world">
+      <div class="sky-bg"></div>
+      <div class="ground-bg"></div>
+      <div class="road-bg"></div>
+      <div id="dashes"><div class="dtrack" id="dtrack"></div></div>
+      <!-- clouds, trees, signs injected by JS -->
+      <div id="kart">🏎️</div>
+      <div id="fluffy">
+        <div id="fluffy-emoji">🐱</div>
+        <div class="fluffy-lbl" id="fluffy-lbl">Save me!</div>
+      </div>
+      <div id="spark-layer"></div>
     </div>
 
-    <!-- Back to demos -->
-    <button class="btn-back" id="btn-back-demos" style="display:none;"
-            data-key="backBtn">← Back</button>
-
+    <!-- Flash -->
+    <div id="flash"></div>
+    <!-- Backdrop for question -->
+    <div id="backdrop"></div>
+    <!-- Question panel -->
+    <div id="qpanel">
+      <div class="qhdr" id="qhdr">⚡ BOOST GATE!</div>
+      <div class="qtimer-wrap"><div class="qtimer-bar" id="qtimer"></div></div>
+      <div class="qformula">
+        <div class="qvalues" id="qvals"></div>
+        <div class="qbig" id="qbig"></div>
+      </div>
+      <div class="qask" id="qask"></div>
+      <div class="qopts" id="qopts"></div>
+      <div class="qhint" id="qhint"></div>
+    </div>
   </div>
-</section>
 
-<!-- ─── SCRIPT ───────────────────────────────────────────────── -->
-<script type="module">
-  import { BRAND }         from './js/content.js';
-  import { applyLang }     from './js/lang.js';
-  import { initStory }     from './js/story.js';
-  import { initSimulator } from './js/simulator.js';
+  <!-- ═══════════ WIN SCREEN ═══════════ -->
+  <div class="screen" id="s-win">
+    <div class="wbox">
+      <span class="wicon">🎉</span>
+      <h2 class="wtitle" id="w-title">FLUFFY IS SAVED!</h2>
+      <p class="wsub" id="w-sub">You mastered Pascal's Law! 🏆</p>
+      <div class="wscore">⭐ Score: <span id="w-score">0</span></div>
+      <div class="wlesson" id="w-lesson">
+        <strong>Pascal's Law:</strong> P = F ÷ A<br>
+        Pressure spreads equally in ALL directions in a fluid!<br>
+        <em>⚙️ Yuken hydraulics use this every day!</em>
+      </div>
+      <a class="brand-title" href="https://www.yuken.co.jp" target="_blank" style="position:relative;top:auto;left:auto;display:inline-block;margin:10px auto 6px;">⚙️ Learn more at YUKEN</a><br>
+      <button class="btn btn-go" style="margin-top:10px" onclick="resetGame()">🔄 Race Again!</button>
+    </div>
+  </div>
 
-  // Wire brand logo/link
-  const logoLink  = document.getElementById('brand-logo-link');
-  const menuLink  = document.getElementById('menu-brand-link');
-  const logoImg   = document.getElementById('brand-logo-img');
-  const menuLogoSm = document.getElementById('menu-logo-sm');
-  if (logoLink)  logoLink.href  = BRAND.logoLink;
-  if (menuLink)  menuLink.href  = BRAND.logoLink;
-  if (logoImg)   logoImg.src    = BRAND.logoSrc;
-  if (menuLogoSm) menuLogoSm.src = BRAND.logoSrc;
+  <!-- ═══════════ LOSE SCREEN ═══════════ -->
+  <div class="screen" id="s-lose">
+    <div class="lbox">
+      <span class="licon">😢</span>
+      <h2 class="ltitle" id="l-title">Fluffy is still stuck!</h2>
+      <div class="lhint" id="l-hint">
+        💡 Remember: <strong>P = F ÷ A</strong><br>
+        Pressure = Force ÷ Area
+      </div>
+      <button class="btn btn-go" onclick="resetGame()">💪 Try Again!</button>
+    </div>
+  </div>
 
-  // Screen router
-  function show(id) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById('screen-' + id).classList.add('active');
+</div>
+<script>
+/* ═══════════════════════════════════════════════════════════
+   CONTENT  ← Edit all game text and branding here!
+═══════════════════════════════════════════════════════════ */
+const C = {
+  en: {
+    startBtn:   "🚀 START RACING!",
+    fluffyLbl:  "Save me! 😱",
+    qHdr:       ["⚡ BOOST GATE!","🔥 GO FAST!","💥 SPEED UP!","🌟 TURBO!","🚀 MAX POWER!"],
+    qAsk:       "What is the Pressure (P)?",
+    unit:       "N/cm²",
+    correct:    ["🚀 TURBO BOOST!","⚡ AMAZING!","🌟 PERFECT!","💥 ON FIRE!","🔥 GENIUS!"],
+    wrong:      ["😬 Oops! Try again!","💭 Almost! Think again!","🤔 Use P = F ÷ A!","❌ Keep trying!"],
+    hintPre:    "💡 Hint: ",
+    winTitle:   "🎉 FLUFFY IS SAVED!",
+    winSub:     "You mastered Pascal's Law! 🏆",
+    winLesson:  "Pascal's Law: P = F ÷ A\nPressure spreads equally in ALL directions!\n⚙️ Yuken hydraulics use this every day!",
+    loseTitle:  "Fluffy is still stuck!",
+    loseHint:   "💡 Remember: P = F ÷ A\nPressure = Force ÷ Area",
+    qLabel:     "Q",
+    score:      "⭐",
+  },
+  ja: {
+    startBtn:   "🚀 レーススタート！",
+    fluffyLbl:  "助けて！😱",
+    qHdr:       ["⚡ ブーストゲート！","🔥 スピードアップ！","💥 全力疾走！","🌟 ターボ！","🚀 マックスパワー！"],
+    qAsk:       "圧力 (P) はいくつ？",
+    unit:       "N/cm²",
+    correct:    ["🚀 ターボブースト！","⚡ すごい！","🌟 完璧！","💥 最高！","🔥 天才！"],
+    wrong:      ["😬 惜しい！もう一回！","💭 あと少し！考えて！","🤔 P = F ÷ A を使おう！","❌ もう一回チャレンジ！"],
+    hintPre:    "💡 ヒント：",
+    winTitle:   "🎉 モフモフ救出！",
+    winSub:     "パスカルの法則マスター！🏆",
+    winLesson:  "パスカルの法則：P = F ÷ A\n流体の中で圧力はすべての方向に同じように広がる！\n⚙️ ユーケン油圧製品は毎日これを使っています！",
+    loseTitle:  "モフモフがまだ捕まってる！",
+    loseHint:   "💡 覚えよう：P = F ÷ A\n圧力 = 力 ÷ 面積",
+    qLabel:     "問",
+    score:      "⭐",
+  }
+};
 
-    // Show back btn only in simulator when demo is open
-    const backBtn = document.getElementById('btn-back-demos');
-    if (backBtn) backBtn.style.display = id === 'simulator' ? 'block' : 'none';
+/* ═══════════════════════════════════════════════════════════
+   QUESTIONS  ← Edit these to change quiz content
+   { f: Force(N), a: Area(cm²), p: Pressure(answer), wrong: [w1,w2], hint }
+═══════════════════════════════════════════════════════════ */
+const QS = [
+  { f:10,  a:2,  p:5,  wrong:[3,8],  hint:"10 ÷ 2 = ?" },
+  { f:24,  a:4,  p:6,  wrong:[10,3], hint:"24 ÷ 4 = ?" },
+  { f:40,  a:8,  p:5,  wrong:[6,4],  hint:"40 ÷ 8 = ?" },
+  { f:70,  a:10, p:7,  wrong:[5,9],  hint:"70 ÷ 10 = ?" },
+  { f:90,  a:9,  p:10, wrong:[15,7], hint:"90 ÷ 9 = ?" },
+];
+
+/* ═══════════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════════ */
+let lang='en', qIdx=0, lives=3, score=0, phase='title', answered=false;
+let timerTO=null, hintTO=null;
+
+/* ─── HELPERS ────────────────────────────────────────────── */
+const $  = id => document.getElementById(id);
+const rnd = (arr) => arr[Math.floor(Math.random()*arr.length)];
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $('s-'+id).classList.add('active');
+}
+
+/* ─── TITLE INIT ────────────────────────────────────────── */
+$('btn-en').onclick = ()=>startGame('en');
+$('btn-ja').onclick = ()=>startGame('ja');
+
+/* Spawn drifting clouds on title */
+(()=>{
+  const emojis=['☁️','🌤️','⛅','☁️'];
+  const title=$('s-title');
+  for(let i=0;i<5;i++){
+    const el=document.createElement('div');
+    el.style.cssText=`position:absolute;font-size:${2+Math.random()*1.5}rem;
+      top:${4+i*11}%;animation:cloudMove ${10+i*3}s linear infinite;
+      animation-delay:${-i*2.5}s;z-index:1;`;
+    el.textContent=emojis[i%emojis.length];
+    title.appendChild(el);
+  }
+})();
+
+/* ─── START GAME ────────────────────────────────────────── */
+function startGame(l){
+  lang=l; qIdx=0; lives=3; score=0; phase='racing';
+  answered=false;
+  $('q-num').textContent='1';
+  $('score-num').textContent='0';
+  $('prog-fill').style.width='0%';
+  $('prog-kart').style.left='0%';
+  updateLives();
+  $('fluffy-lbl').textContent=C[lang].fluffyLbl;
+  $('fluffy-emoji').textContent='🐱';
+  $('fluffy').classList.remove('celebrating');
+  buildWorld();
+  showScreen('race');
+  // First question after short intro
+  setTimeout(()=>{ if(phase==='racing') openQuestion(); }, 2200);
+}
+
+/* ─── BUILD RACE WORLD ──────────────────────────────────── */
+function buildWorld(){
+  const world=$('world');
+  world.querySelectorAll('.cloud,.tree,.sign').forEach(e=>e.remove());
+  $('spark-layer').innerHTML='';
+
+  // Dashes
+  const dt=$('dtrack'); dt.innerHTML='';
+  for(let i=0;i<32;i++){ const d=document.createElement('div'); d.className='dash'; dt.appendChild(d); }
+
+  // Clouds
+  const clouds=['☁️','🌤️','⛅','☁️','☁️'];
+  for(let i=0;i<5;i++){
+    const el=document.createElement('div');
+    el.className='cloud';
+    el.style.cssText=`top:${3+Math.random()*28}%;font-size:${1.8+Math.random()*1.8}rem;
+      animation-duration:${9+Math.random()*9}s;animation-delay:${-Math.random()*12}s;`;
+    el.textContent=clouds[i];
+    world.appendChild(el);
   }
 
-  // Floating particles on menu
-  function spawnParticles() {
-    const layer = document.getElementById('particles');
-    if (!layer) return;
-    const symbols = ['P','F','A','÷','=','💧','⚙️','🔩'];
-    setInterval(() => {
-      const el = document.createElement('div');
-      el.className = 'particle';
-      el.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-      el.style.left = `${Math.random() * 100}vw`;
-      el.style.animationDuration = `${6 + Math.random() * 8}s`;
-      el.style.fontSize = `${0.8 + Math.random() * 1.2}rem`;
-      layer.appendChild(el);
-      setTimeout(() => el.remove(), 14000);
-    }, 700);
+  // Trees above road
+  const treeTop=['🌳','🌴','🌵','🎋'];
+  for(let i=0;i<10;i++){
+    const el=document.createElement('div');
+    el.className='tree hi';
+    el.style.cssText=`font-size:${2.2+Math.random()*1}rem;
+      animation-duration:${4+Math.random()*4}s;animation-delay:${-Math.random()*8}s;`;
+    el.textContent=treeTop[i%treeTop.length];
+    world.appendChild(el);
   }
 
-  // Init
-  document.addEventListener('DOMContentLoaded', () => {
-    spawnParticles();
-    applyLang();
+  // Trees below road
+  const treeBot=['🌲','🌴','🌻','🌸'];
+  for(let i=0;i<10;i++){
+    const el=document.createElement('div');
+    el.className='tree lo';
+    el.style.cssText=`font-size:${2+Math.random()*1}rem;
+      animation-duration:${4+Math.random()*4}s;animation-delay:${-Math.random()*8}s;`;
+    el.textContent=treeBot[i%treeBot.length];
+    world.appendChild(el);
+  }
 
-    // Init story + simulator
-    initStory(() => show('simulator'));
-    initSimulator();
+  // Yuken signs
+  const signTexts=['⚙️ YUKEN','P = F ÷ A','💧 PASCAL','🔩 YUKEN'];
+  for(let i=0;i<4;i++){
+    const wrap=document.createElement('div');
+    wrap.className='sign';
+    wrap.style.cssText=`animation-duration:${6+i*1.5}s;animation-delay:${-i*2}s;`;
+    const pole=document.createElement('div'); pole.className='sign-pole';
+    const inner=document.createElement('div'); inner.className='sign-inner';
+    inner.textContent=signTexts[i%signTexts.length];
+    wrap.appendChild(inner); wrap.appendChild(pole);
+    world.appendChild(wrap);
+  }
+}
 
-    // Menu buttons
-    document.getElementById('btn-start').addEventListener('click', () => show('story'));
-    document.getElementById('btn-sim-only').addEventListener('click', () => show('simulator'));
+/* ─── HUD ───────────────────────────────────────────────── */
+function updateLives(){
+  $('lives-el').textContent='❤️'.repeat(lives)+'🖤'.repeat(Math.max(0,3-lives));
+}
+function updateProgress(){
+  const pct=Math.round((qIdx/QS.length)*100);
+  $('prog-fill').style.width=pct+'%';
+  $('prog-kart').style.left=Math.max(0,pct-2)+'%';
+  $('q-num').textContent=Math.min(qIdx+1,QS.length);
+  $('score-num').textContent=score;
+}
+
+/* ─── OPEN QUESTION ─────────────────────────────────────── */
+function openQuestion(){
+  if(phase!=='racing') return;
+  if(qIdx>=QS.length){ finishRace(true); return; }
+  phase='question'; answered=false;
+
+  const q=QS[qIdx]; const c=C[lang];
+
+  // Panel content
+  $('qhdr').textContent=c.qHdr[qIdx%c.qHdr.length];
+  $('qhdr').style.background=['#06B6D4','#F97316','#A855F7','#EC4899','#22C55E'][qIdx%5];
+  $('qvals').textContent=`Force (F) = ${q.f} N   |   Area (A) = ${q.a} cm²`;
+  $('qbig').innerHTML=`P = ${q.f} ÷ ${q.a} = <span style="color:var(--coral)">?</span>`;
+  $('qask').textContent=c.qAsk;
+  $('qhint').textContent=''; $('qhint').classList.remove('show');
+
+  // Shuffle answers
+  const opts=[{v:q.p,ok:true},{v:q.wrong[0],ok:false},{v:q.wrong[1],ok:false}]
+    .sort(()=>Math.random()-.5);
+  const container=$('qopts'); container.innerHTML='';
+  opts.forEach(o=>{
+    const btn=document.createElement('button');
+    btn.className='qbtn';
+    btn.textContent=o.v+' '+c.unit;
+    btn.onclick=()=>pick(o.ok,btn,q);
+    container.appendChild(btn);
   });
-</script>
 
+  // Slow road during question
+  $('dashes').classList.remove('fast'); $('dashes').classList.add('slow');
+
+  // Show panel
+  const p=$('qpanel'); p.classList.add('open');
+  $('backdrop').style.display='block';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>p.classList.add('show')));
+
+  // Timer 8s
+  const bar=$('qtimer');
+  bar.style.transition='none'; bar.style.width='100%';
+  bar.offsetWidth; // reflow
+  bar.style.transition='width 8s linear'; bar.style.width='0%';
+
+  hintTO=setTimeout(()=>{
+    if(answered) return;
+    $('qhint').textContent=c.hintPre+q.hint; $('qhint').classList.add('show');
+  },4000);
+
+  timerTO=setTimeout(()=>{
+    if(!answered) pick(false,null,q,true);
+  },8000);
+}
+
+/* ─── PICK ANSWER ───────────────────────────────────────── */
+function pick(ok,btn,q,timeout=false){
+  if(answered) return;
+  answered=true;
+  clearTimeout(timerTO); clearTimeout(hintTO);
+  document.querySelectorAll('.qbtn').forEach(b=>b.disabled=true);
+
+  if(ok){ onRight(btn); }
+  else   { onWrong(btn,q); }
+}
+
+function onRight(btn){
+  if(btn){ btn.classList.add('ok'); btn.textContent='✅ '+btn.textContent; }
+
+  score+=100;
+  updateProgress();
+
+  // Flash + sparks
+  const flash=$('flash'); flash.classList.remove('go');
+  flash.offsetWidth; flash.classList.add('go');
+  setTimeout(()=>flash.classList.remove('go'),700);
+  spawnSparks();
+
+  // Boost message toast
+  showToast(rnd(C[lang].correct),'var(--green)');
+
+  // Close panel after celebration
+  setTimeout(()=>{
+    closePanel();
+    qIdx++;
+    updateProgress();
+    if(qIdx>=QS.length){
+      $('fluffy').classList.add('celebrating');
+      $('fluffy-emoji').textContent='😸';
+      setTimeout(()=>finishRace(true),900);
+    } else {
+      phase='racing';
+      boostKart();
+      $('dashes').classList.remove('slow'); $('dashes').classList.add('fast');
+      setTimeout(()=>$('dashes').classList.remove('fast'),1800);
+      setTimeout(()=>{ if(phase==='racing') openQuestion(); },3200);
+    }
+  },1000);
+}
+
+function onWrong(btn,q,timeout=false){
+  if(btn){ btn.classList.add('no'); }
+  lives=Math.max(0,lives-1); updateLives();
+
+  $('kart').classList.remove('shaking');
+  $('kart').offsetWidth;
+  $('kart').classList.add('shaking');
+  setTimeout(()=>$('kart').classList.remove('shaking'),500);
+
+  const c=C[lang];
+  showToast(rnd(c.wrong),'var(--coral)');
+  $('qhint').textContent=c.hintPre+q.hint; $('qhint').classList.add('show');
+
+  if(lives<=0){
+    setTimeout(()=>{ closePanel(); finishRace(false); },1500);
+    return;
+  }
+
+  // Re-enable for retry
+  setTimeout(()=>{
+    answered=false;
+    document.querySelectorAll('.qbtn').forEach(b=>{b.disabled=false;b.classList.remove('no','ok');});
+    const bar=$('qtimer');
+    bar.style.transition='none'; bar.style.width='100%';
+    bar.offsetWidth;
+    bar.style.transition='width 6s linear'; bar.style.width='0%';
+    clearTimeout(timerTO);
+    timerTO=setTimeout(()=>{ if(!answered) pick(false,null,q,true); },6000);
+  },800);
+}
+
+function closePanel(){
+  const p=$('qpanel');
+  p.classList.remove('show');
+  $('backdrop').style.display='none';
+  $('dashes').classList.remove('slow');
+  setTimeout(()=>p.classList.remove('open'),350);
+}
+
+/* ─── KART BOOST ────────────────────────────────────────── */
+function boostKart(){
+  const k=$('kart'); k.classList.add('boosting');
+  for(let i=0;i<8;i++) setTimeout(spawnSpeedLine,i*80);
+  setTimeout(()=>k.classList.remove('boosting'),1400);
+}
+function spawnSpeedLine(){
+  const k=$('kart'), w=$('world');
+  const kr=k.getBoundingClientRect(), wr=w.getBoundingClientRect();
+  const el=document.createElement('div');
+  el.className='speedline';
+  el.style.cssText=`left:${kr.left-wr.left+8}px;top:${kr.top-wr.top+10+Math.random()*28}px;`;
+  w.appendChild(el);
+  setTimeout(()=>el.remove(),350);
+}
+
+/* ─── SPARKS / TOAST ────────────────────────────────────── */
+function spawnSparks(){
+  const sparks=['⭐','✨','🌟','💫','⚡','🎉'];
+  const p=$('qpanel'), pr=p.getBoundingClientRect();
+  for(let i=0;i<10;i++){
+    const el=document.createElement('div');
+    el.className='spark';
+    el.textContent=rnd(sparks);
+    el.style.cssText=`font-size:${1+Math.random()*1.2}rem;
+      left:${pr.left+Math.random()*pr.width}px;
+      top:${pr.top+Math.random()*pr.height}px;
+      animation-delay:${Math.random()*.3}s;`;
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),900);
+  }
+}
+
+let toastTO=null;
+function showToast(msg,bg){
+  let t=document.getElementById('toast');
+  if(!t){
+    t=document.createElement('div'); t.id='toast';
+    t.style.cssText=`position:fixed;top:80px;left:50%;transform:translateX(-50%);
+      z-index:500;font-family:'Fredoka One',sans-serif;font-size:1.3rem;color:white;
+      border:3px solid #1C1C1E;border-radius:20px;padding:10px 22px;
+      box-shadow:4px 4px 0 #1C1C1E;transition:opacity .3s,transform .3s;white-space:nowrap;`;
+    document.body.appendChild(t);
+  }
+  t.textContent=msg; t.style.background=bg;
+  t.style.opacity='1'; t.style.transform='translateX(-50%) scale(1)';
+  clearTimeout(toastTO);
+  toastTO=setTimeout(()=>{
+    t.style.opacity='0'; t.style.transform='translateX(-50%) scale(.8)';
+  },1200);
+}
+
+/* ─── FINISH ────────────────────────────────────────────── */
+function finishRace(won){
+  phase=won?'win':'lose';
+  if(won){
+    $('prog-fill').style.width='100%';
+    $('prog-kart').style.left='98%';
+    setTimeout(()=>{
+      showScreen('win');
+      $('w-title').textContent=C[lang].winTitle;
+      $('w-sub').textContent=C[lang].winSub;
+      $('w-score').textContent=score;
+      $('w-lesson').innerHTML=C[lang].winLesson.replace(/\n/g,'<br>');
+      spawnConfetti();
+    },700);
+  } else {
+    setTimeout(()=>{
+      showScreen('lose');
+      $('l-title').textContent=C[lang].loseTitle;
+      $('l-hint').innerHTML=C[lang].loseHint.replace(/\n/g,'<br>');
+    },400);
+  }
+}
+
+function spawnConfetti(){
+  const colors=['#FFE135','#FF6B6B','#06B6D4','#22C55E','#F97316','#A855F7','#EC4899'];
+  const emojis=['⭐','🎊','🎉','✨','🌟','😸'];
+  for(let i=0;i<60;i++){
+    const el=document.createElement('div');
+    el.className='confetti';
+    const isEmoji=Math.random()>.45;
+    el.textContent=isEmoji?rnd(emojis):'●';
+    el.style.cssText=`
+      left:${Math.random()*100}vw;top:-20px;
+      font-size:${isEmoji?(1+Math.random()*.8)+'rem':(6+Math.random()*10)+'px'};
+      color:${colors[Math.floor(Math.random()*colors.length)]};
+      animation-duration:${2+Math.random()*3}s;
+      animation-delay:${Math.random()*1.5}s;`;
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),5500);
+  }
+}
+
+function resetGame(){
+  clearTimeout(timerTO); clearTimeout(hintTO);
+  phase='title';
+  showScreen('title');
+}
+</script>
 </body>
 </html>
