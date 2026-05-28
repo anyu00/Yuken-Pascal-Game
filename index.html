@@ -2,881 +2,1049 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>🐱 Save Fluffy! – Pascal's Pressure Race</title>
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>Hydraulic Mayhem: Toilet Rescue</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
   <style>
-    /* ─── BRAND / EDIT THESE ─────────────────────────────────── */
-    :root {
-      --brand-name:   "YUKEN";
-      --brand-color:  #D22F2F;
-      --brand-url:    "https://www.yuken.co.jp";
-    }
-    /* ─── SPONGEBOB PALETTE ───────────────────────────────────── */
-    :root {
-      --yellow:   #FFE135;
-      --coral:    #FF6B6B;
-      --teal:     #06B6D4;
-      --sky:      #7EC8E3;
-      --green:    #22C55E;
-      --dkgreen:  #16A34A;
-      --orange:   #F97316;
-      --purple:   #A855F7;
-      --pink:     #EC4899;
-      --road:     #374151;
-      --black:    #1C1C1E;
-      --white:    #FFFFFF;
-    }
-
     *{margin:0;padding:0;box-sizing:border-box;}
-    body{
-      font-family:'Fredoka One','Nunito',system-ui,sans-serif;
-      background:var(--sky);
-      height:100vh;overflow:hidden;
-      user-select:none;-webkit-user-select:none;
-    }
-    #game{position:relative;width:100vw;height:100vh;overflow:hidden;}
-
-    /* ══════════════════════════════════════════
-       SCREENS
-    ══════════════════════════════════════════ */
-    .screen{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;}
-    .screen.active{display:flex;}
-
-    /* ══════════════════════════════════════════
-       TITLE SCREEN
-    ══════════════════════════════════════════ */
-    #s-title{
-      background:linear-gradient(180deg,#7EC8E3 0%,#B0E8FF 55%,var(--green) 55%,var(--dkgreen) 100%);
-    }
-    .t-sun{position:absolute;top:14px;right:50px;font-size:4.5rem;animation:sunSpin 25s linear infinite;z-index:1;}
-    @keyframes sunSpin{to{transform:rotate(360deg)}}
-
-    .t-card{
-      background:var(--yellow);
-      border:4px solid var(--black);
-      border-radius:28px;
-      padding:28px 32px 24px;
-      text-align:center;
-      box-shadow:7px 7px 0 var(--black);
-      max-width:360px;width:92%;z-index:10;
-      animation:popIn .6s cubic-bezier(.34,1.56,.64,1);
-    }
-    @keyframes popIn{from{transform:scale(0) rotate(-6deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
-
-    .t-icon{font-size:3.8rem;display:block;animation:wiggle 2s ease-in-out infinite;}
-    .t-title{font-size:2.6rem;color:var(--black);line-height:1;margin:6px 0;text-shadow:3px 3px 0 rgba(0,0,0,.15);}
-    .t-sub{font-size:1rem;color:var(--coral);margin-bottom:10px;font-weight:900;}
-    .t-story{
-      font-size:.85rem;color:#333;
-      background:white;border:2px solid var(--black);
-      border-radius:12px;padding:8px 12px;margin:8px 0 14px;
-      line-height:1.5;
-    }
-    .t-story strong{color:var(--coral);}
-
-    .btn{
-      display:block;width:100%;
-      border:3px solid var(--black);border-radius:40px;
-      padding:13px 28px;cursor:pointer;
-      font-family:'Fredoka One',sans-serif;font-size:1.3rem;color:white;
-      box-shadow:4px 4px 0 var(--black);
-      transition:transform .1s,box-shadow .1s;
-    }
-    .btn:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--black);}
-    .btn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--black);}
-    .btn-go{background:var(--coral);animation:pulse 1.6s ease-in-out infinite;}
-    .btn-ja{background:var(--teal);margin-top:8px;font-size:1.1rem;}
-    @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
-    .btn-go:hover,.btn-go:active{animation:none;}
-    .brand-title{
-      position:absolute;top:10px;left:12px;
-      font-size:.75rem;font-weight:900;color:white;
-      background:var(--brand-color);
-      border:2px solid var(--black);border-radius:8px;
-      padding:3px 8px;box-shadow:2px 2px 0 var(--black);
-      text-decoration:none;z-index:20;
-    }
-
-    /* ══════════════════════════════════════════
-       RACE SCREEN
-    ══════════════════════════════════════════ */
-    #s-race{flex-direction:column;background:var(--sky);}
-
-    /* HUD */
-    #hud{
-      position:absolute;top:0;left:0;right:0;z-index:100;
-      background:rgba(255,255,255,.93);
-      border-bottom:3px solid var(--black);
-      padding:6px 12px;display:flex;flex-direction:column;gap:4px;
-    }
-    .hud-bar{display:flex;align-items:center;gap:8px;}
-    #prog-bg{
-      flex:1;height:22px;
-      background:#e5e7eb;border:2px solid var(--black);border-radius:11px;overflow:hidden;position:relative;
-    }
-    #prog-fill{
-      height:100%;border-radius:11px;
-      background:linear-gradient(90deg,var(--teal),var(--green));
-      width:0%;transition:width .9s cubic-bezier(.34,1.56,.64,1);
-    }
-    #prog-kart{
-      position:absolute;top:50%;left:0%;
-      transform:translate(-50%,-50%);font-size:1rem;
-      transition:left .9s cubic-bezier(.34,1.56,.64,1);pointer-events:none;
-    }
-    .hud-icon{font-size:1.1rem;}
-    .hud-row2{display:flex;justify-content:space-between;align-items:center;}
-    #lives-el{font-size:1.2rem;letter-spacing:2px;}
-    #q-counter{font-size:.85rem;color:var(--purple);font-weight:900;}
-    #score-el{font-size:.85rem;font-weight:900;}
-
-    /* Race world */
-    #world{
-      position:absolute;top:68px;left:0;right:0;bottom:0;
-      overflow:hidden;
-    }
-    .sky-bg{
-      position:absolute;top:0;left:0;right:0;height:46%;
-      background:linear-gradient(180deg,#7EC8E3 0%,#B8E8FF 100%);
-    }
-    .ground-bg{
-      position:absolute;bottom:0;left:0;right:0;height:35%;
-      background:var(--green);
-      border-top:3px solid var(--dkgreen);
-    }
-    .road-bg{
-      position:absolute;left:0;right:0;
-      top:calc(46% - 28px);height:88px;
-      background:var(--road);
-      border-top:3px solid #4B5563;
-      border-bottom:3px solid #4B5563;
-    }
-
-    /* Dashes */
-    #dashes{
-      position:absolute;left:0;right:0;
-      top:calc(46% + 14px);height:8px;
-      overflow:hidden;pointer-events:none;
-    }
-    .dtrack{display:flex;gap:0;animation:dashMove .4s linear infinite;}
-    @keyframes dashMove{from{transform:translateX(0)}to{transform:translateX(-60px)}}
-    .dash{width:40px;height:8px;background:var(--yellow);border-radius:4px;margin-right:20px;flex-shrink:0;}
-    #dashes.fast .dtrack{animation-duration:.15s;}
-    #dashes.slow .dtrack{animation-duration:.9s;}
-
-    /* Clouds */
-    .cloud{position:absolute;animation:cloudMove linear infinite;z-index:2;}
-    @keyframes cloudMove{from{left:108%}to{left:-18%}}
-
-    /* Trees */
-    .tree{position:absolute;animation:objMove linear infinite;z-index:3;font-size:2.4rem;}
-    .tree.hi{top:calc(40% - 48px);}
-    .tree.lo{bottom:calc(35% - 8px);}
-    @keyframes objMove{from{left:108%}to{left:-10%}}
-
-    /* Yuken signs */
-    .sign{
-      position:absolute;bottom:calc(35% + 8px);
-      animation:objMove linear infinite;z-index:3;
-    }
-    .sign-inner{
-      background:var(--brand-color);border:3px solid var(--black);
-      border-radius:8px;padding:3px 8px;
-      font-size:.7rem;font-weight:900;color:white;
-      box-shadow:2px 2px 0 var(--black);white-space:nowrap;
-    }
-    .sign-pole{width:4px;height:18px;background:#888;margin:0 auto;}
-
-    /* Kart */
-    #kart{
-      position:absolute;left:16%;top:46%;
-      font-size:3rem;z-index:10;
-      animation:kartBounce .35s ease-in-out infinite;
-      transform-origin:bottom center;
-      cursor:default;
-    }
-    @keyframes kartBounce{
-      0%,100%{transform:translateY(0)}
-      50%{transform:translateY(-6px)}
-    }
-    #kart.boosting{animation:kartBoost .15s ease-in-out infinite;}
-    @keyframes kartBoost{0%,100%{transform:translateY(-8px) scaleX(1.1)}50%{transform:translateY(0) scaleX(1)}}
-    #kart.shaking{animation:kartShake .45s ease !important;}
-    @keyframes kartShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
-
-    /* Speed lines */
-    .speedline{
-      position:absolute;height:3px;border-radius:2px;
-      background:linear-gradient(90deg,transparent,var(--yellow));
-      pointer-events:none;z-index:9;
-      animation:sline .3s linear forwards;
-    }
-    @keyframes sline{from{width:55px;opacity:1;transform:translateX(0)}to{width:0;opacity:0;transform:translateX(-70px)}}
-
-    /* Fluffy */
-    #fluffy{
-      position:absolute;right:6%;top:42%;
-      font-size:3.2rem;z-index:8;text-align:center;
-      animation:fluffyDance 2s ease-in-out infinite;
-    }
-    .fluffy-lbl{
-      font-size:.7rem;font-weight:900;color:var(--black);
-      background:white;border:2px solid var(--black);
-      border-radius:7px;padding:1px 5px;margin-top:2px;text-align:center;
-    }
-    @keyframes fluffyDance{0%,100%{transform:translateY(0) rotate(0)}33%{transform:translateY(-10px) rotate(-12deg)}66%{transform:translateY(-5px) rotate(12deg)}}
-    #fluffy.celebrating{animation:fluffyCelebrate .4s ease-in-out infinite;}
-    @keyframes fluffyCelebrate{0%,100%{transform:scale(1) rotate(0)}50%{transform:scale(1.3) rotate(15deg)}}
-
-    /* Flash overlay */
-    #flash{position:absolute;inset:0;pointer-events:none;z-index:60;opacity:0;}
-    #flash.go{animation:flashAnim .65s ease forwards;}
-    @keyframes flashAnim{0%{opacity:0}20%{opacity:.7;background:var(--yellow)}100%{opacity:0;background:transparent}}
-
-    /* Backdrop */
-    #backdrop{
-      display:none;position:absolute;inset:0;
-      background:rgba(0,0,0,.48);
-      backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
-      z-index:150;
-    }
-
-    /* ══════════════════════════════════════════
-       QUESTION PANEL
-    ══════════════════════════════════════════ */
-    #qpanel{
-      position:absolute;left:50%;top:50%;
-      transform:translate(-50%,-50%) scale(0);
-      transition:transform .4s cubic-bezier(.34,1.56,.64,1);
-      width:92%;max-width:480px;
-      background:white;border:4px solid var(--black);border-radius:26px;
-      padding:20px;z-index:200;
-      box-shadow:8px 8px 0 var(--black);text-align:center;
-      display:none;
-    }
-    #qpanel.open{display:block;}
-    #qpanel.open.show{transform:translate(-50%,-50%) scale(1);}
-
-    .qhdr{
-      border:3px solid var(--black);border-radius:14px;
-      padding:7px 12px;margin-bottom:12px;
-      color:white;font-size:1.05rem;
-    }
-    .qtimer-wrap{height:7px;background:#e5e7eb;border-radius:4px;border:1.5px solid #ccc;overflow:hidden;margin-bottom:12px;}
-    .qtimer-bar{height:100%;background:linear-gradient(90deg,var(--green),var(--orange),var(--coral));border-radius:4px;width:100%;transition:width linear;}
-
-    .qformula{
-      background:var(--yellow);border:3px solid var(--black);
-      border-radius:12px;padding:10px;margin:8px 0;
-    }
-    .qvalues{font-size:.9rem;color:#555;margin-bottom:4px;}
-    .qbig{font-size:1.7rem;color:var(--black);}
-    .qask{font-size:1rem;color:var(--black);margin:8px 0 4px;}
-
-    .qopts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;}
-    .qbtn{
-      background:var(--coral);border:3px solid var(--black);border-radius:14px;
-      padding:11px 6px;font-family:'Fredoka One',sans-serif;font-size:1.3rem;color:white;
-      cursor:pointer;box-shadow:3px 3px 0 var(--black);
-      transition:transform .1s,box-shadow .1s,background .15s;
-    }
-    .qbtn:not(:disabled):hover{transform:translate(-1px,-2px);box-shadow:4px 5px 0 var(--black);}
-    .qbtn:not(:disabled):active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);}
-    .qbtn.ok{background:var(--green) !important;}
-    .qbtn.no{animation:btnShake .35s ease;}
-    @keyframes btnShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px) rotate(-3deg)}75%{transform:translateX(8px) rotate(3deg)}}
-    .qbtn:disabled{cursor:default;}
-
-    .qhint{
-      display:none;font-size:.85rem;color:#555;
-      background:#f3f4f6;border-radius:8px;padding:6px;margin-top:10px;
-    }
-    .qhint.show{display:block;}
-
-    /* ══════════════════════════════════════════
-       STARS / SPARKS
-    ══════════════════════════════════════════ */
-    .spark{
-      position:fixed;pointer-events:none;z-index:300;
-      animation:sparkPop .8s ease forwards;
-    }
-    @keyframes sparkPop{0%{transform:scale(0) rotate(0);opacity:1}100%{transform:scale(3) rotate(200deg);opacity:0}}
-
-    .confetti{
-      position:fixed;pointer-events:none;z-index:400;
-      animation:confFall linear forwards;
-    }
-    @keyframes confFall{0%{transform:translateY(-10px) rotate(0) scale(1);opacity:1}100%{transform:translateY(100vh) rotate(720deg) scale(.4);opacity:0}}
-
-    /* ══════════════════════════════════════════
-       WIN SCREEN
-    ══════════════════════════════════════════ */
-    #s-win{background:linear-gradient(180deg,#87CEEB 0%,var(--green) 60%);}
-    .wbox{
-      background:var(--yellow);border:4px solid var(--black);border-radius:26px;
-      padding:30px;box-shadow:8px 8px 0 var(--black);
-      max-width:380px;width:92%;text-align:center;
-      animation:popIn .6s cubic-bezier(.34,1.56,.64,1);
-    }
-    .wicon{font-size:4.5rem;display:block;animation:wiggle 1s ease-in-out infinite;}
-    .wtitle{font-size:2.3rem;color:var(--black);margin:8px 0;}
-    .wsub{font-size:.95rem;color:#444;margin-bottom:12px;}
-    .wscore{background:var(--teal);border:3px solid var(--black);border-radius:12px;padding:9px;font-size:1.4rem;color:white;margin:8px 0;}
-    .wlesson{background:white;border:2px solid var(--black);border-radius:12px;padding:10px;font-size:.88rem;color:var(--black);margin:8px 0;line-height:1.6;}
-
-    /* ══════════════════════════════════════════
-       LOSE SCREEN
-    ══════════════════════════════════════════ */
-    #s-lose{background:linear-gradient(180deg,#FF8A65 0%,#FF6B6B 100%);}
-    .lbox{
-      background:white;border:4px solid var(--black);border-radius:26px;
-      padding:30px;box-shadow:8px 8px 0 var(--black);
-      max-width:340px;width:92%;text-align:center;
-      animation:popIn .6s cubic-bezier(.34,1.56,.64,1);
-    }
-    .licon{font-size:4rem;display:block;animation:wiggle 1s ease-in-out infinite;}
-    .ltitle{font-size:2rem;color:var(--black);margin:8px 0;}
-    .lhint{
-      font-size:.88rem;color:#555;
-      background:#FFF3E0;border:2px solid var(--orange);
-      border-radius:10px;padding:8px;margin:10px 0;
-    }
-
-    /* shared anims */
-    @keyframes wiggle{0%,100%{transform:rotate(0) scale(1)}25%{transform:rotate(-8deg) scale(1.1)}75%{transform:rotate(8deg) scale(1.1)}}
-
-    @media(max-width:380px){
-      .t-title{font-size:2.1rem;}
-      #kart{font-size:2.3rem;}
-      #fluffy{font-size:2.4rem;}
-      .qbtn{font-size:1.1rem;padding:9px 4px;}
-      .qbig{font-size:1.4rem;}
-    }
+    body{background:#1a1a2e;display:flex;justify-content:center;align-items:center;
+         width:100vw;height:100vh;overflow:hidden;}
+    #game canvas{display:block;touch-action:none;}
   </style>
 </head>
 <body>
-<div id="game">
-
-  <!-- ═══════════ TITLE SCREEN ═══════════ -->
-  <div class="screen active" id="s-title">
-    <a class="brand-title" href="https://www.yuken.co.jp" target="_blank">⚙️ YUKEN</a>
-    <div class="t-sun">☀️</div>
-
-    <div class="t-card">
-      <span class="t-icon">🏎️💨</span>
-      <h1 class="t-title">Save Fluffy!</h1>
-      <p class="t-sub">Pascal's Pressure Race ⚡</p>
-
-      <div style="display:flex;justify-content:center;gap:12px;margin:8px 0;font-size:2.2rem">
-        <span style="animation:wiggle 1.5s .2s ease-in-out infinite;display:inline-block">😱🐱</span>
-        <span style="align-self:center;font-size:1.2rem">→</span>
-        <span style="animation:wiggle 1.5s .6s ease-in-out infinite;display:inline-block">😸🐱</span>
-      </div>
-
-      <p class="t-story">
-        🦹 <strong>SQUISH the villain</strong> squashed Fluffy the cat flat! 🥞<br>
-        Race to rescue her using the power of<br>
-        <strong>P = F ÷ A &nbsp;(Pascal's Law!)</strong> 💪<br>
-        Answer correctly → <strong>TURBO BOOST!</strong> 🚀
-      </p>
-
-      <button class="btn btn-go" id="btn-en">🚀 START RACING!</button>
-      <button class="btn btn-ja" id="btn-ja">🎌 日本語でプレイ</button>
-    </div>
-  </div>
-
-  <!-- ═══════════ RACE SCREEN ═══════════ -->
-  <div class="screen" id="s-race">
-    <!-- HUD -->
-    <div id="hud">
-      <div class="hud-bar">
-        <span class="hud-icon">🏎️</span>
-        <div id="prog-bg">
-          <div id="prog-fill"></div>
-          <div id="prog-kart">🏎️</div>
-        </div>
-        <span class="hud-icon">🐱</span>
-      </div>
-      <div class="hud-row2">
-        <div id="lives-el">❤️❤️❤️</div>
-        <div id="q-counter">Q <span id="q-num">1</span>/5</div>
-        <div id="score-el">⭐ <span id="score-num">0</span></div>
-      </div>
-    </div>
-
-    <!-- World -->
-    <div id="world">
-      <div class="sky-bg"></div>
-      <div class="ground-bg"></div>
-      <div class="road-bg"></div>
-      <div id="dashes"><div class="dtrack" id="dtrack"></div></div>
-      <!-- clouds, trees, signs injected by JS -->
-      <div id="kart">🏎️</div>
-      <div id="fluffy">
-        <div id="fluffy-emoji">🐱</div>
-        <div class="fluffy-lbl" id="fluffy-lbl">Save me!</div>
-      </div>
-      <div id="spark-layer"></div>
-    </div>
-
-    <!-- Flash -->
-    <div id="flash"></div>
-    <!-- Backdrop for question -->
-    <div id="backdrop"></div>
-    <!-- Question panel -->
-    <div id="qpanel">
-      <div class="qhdr" id="qhdr">⚡ BOOST GATE!</div>
-      <div class="qtimer-wrap"><div class="qtimer-bar" id="qtimer"></div></div>
-      <div class="qformula">
-        <div class="qvalues" id="qvals"></div>
-        <div class="qbig" id="qbig"></div>
-      </div>
-      <div class="qask" id="qask"></div>
-      <div class="qopts" id="qopts"></div>
-      <div class="qhint" id="qhint"></div>
-    </div>
-  </div>
-
-  <!-- ═══════════ WIN SCREEN ═══════════ -->
-  <div class="screen" id="s-win">
-    <div class="wbox">
-      <span class="wicon">🎉</span>
-      <h2 class="wtitle" id="w-title">FLUFFY IS SAVED!</h2>
-      <p class="wsub" id="w-sub">You mastered Pascal's Law! 🏆</p>
-      <div class="wscore">⭐ Score: <span id="w-score">0</span></div>
-      <div class="wlesson" id="w-lesson">
-        <strong>Pascal's Law:</strong> P = F ÷ A<br>
-        Pressure spreads equally in ALL directions in a fluid!<br>
-        <em>⚙️ Yuken hydraulics use this every day!</em>
-      </div>
-      <a class="brand-title" href="https://www.yuken.co.jp" target="_blank" style="position:relative;top:auto;left:auto;display:inline-block;margin:10px auto 6px;">⚙️ Learn more at YUKEN</a><br>
-      <button class="btn btn-go" style="margin-top:10px" onclick="resetGame()">🔄 Race Again!</button>
-    </div>
-  </div>
-
-  <!-- ═══════════ LOSE SCREEN ═══════════ -->
-  <div class="screen" id="s-lose">
-    <div class="lbox">
-      <span class="licon">😢</span>
-      <h2 class="ltitle" id="l-title">Fluffy is still stuck!</h2>
-      <div class="lhint" id="l-hint">
-        💡 Remember: <strong>P = F ÷ A</strong><br>
-        Pressure = Force ÷ Area
-      </div>
-      <button class="btn btn-go" onclick="resetGame()">💪 Try Again!</button>
-    </div>
-  </div>
-
-</div>
+<div id="game"></div>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
 <script>
 /* ═══════════════════════════════════════════════════════════
-   CONTENT  ← Edit all game text and branding here!
+   CONTENT — Edit everything here for branding / text / tips
 ═══════════════════════════════════════════════════════════ */
-const C = {
-  en: {
-    startBtn:   "🚀 START RACING!",
-    fluffyLbl:  "Save me! 😱",
-    qHdr:       ["⚡ BOOST GATE!","🔥 GO FAST!","💥 SPEED UP!","🌟 TURBO!","🚀 MAX POWER!"],
-    qAsk:       "What is the Pressure (P)?",
-    unit:       "N/cm²",
-    correct:    ["🚀 TURBO BOOST!","⚡ AMAZING!","🌟 PERFECT!","💥 ON FIRE!","🔥 GENIUS!"],
-    wrong:      ["😬 Oops! Try again!","💭 Almost! Think again!","🤔 Use P = F ÷ A!","❌ Keep trying!"],
-    hintPre:    "💡 Hint: ",
-    winTitle:   "🎉 FLUFFY IS SAVED!",
-    winSub:     "You mastered Pascal's Law! 🏆",
-    winLesson:  "Pascal's Law: P = F ÷ A\nPressure spreads equally in ALL directions!\n⚙️ Yuken hydraulics use this every day!",
-    loseTitle:  "Fluffy is still stuck!",
-    loseHint:   "💡 Remember: P = F ÷ A\nPressure = Force ÷ Area",
-    qLabel:     "Q",
-    score:      "⭐",
+const CONTENT = {
+  brand: {
+    name:    'YUKEN',
+    tagline: 'Powered by Hydraulic Technology',
+    url:     'https://www.yuken.co.jp',
+    model:   'YK-500 PRESSURE LAUNCHER',
   },
-  ja: {
-    startBtn:   "🚀 レーススタート！",
-    fluffyLbl:  "助けて！😱",
-    qHdr:       ["⚡ ブーストゲート！","🔥 スピードアップ！","💥 全力疾走！","🌟 ターボ！","🚀 マックスパワー！"],
-    qAsk:       "圧力 (P) はいくつ？",
-    unit:       "N/cm²",
-    correct:    ["🚀 ターボブースト！","⚡ すごい！","🌟 完璧！","💥 最高！","🔥 天才！"],
-    wrong:      ["😬 惜しい！もう一回！","💭 あと少し！考えて！","🤔 P = F ÷ A を使おう！","❌ もう一回チャレンジ！"],
-    hintPre:    "💡 ヒント：",
-    winTitle:   "🎉 モフモフ救出！",
-    winSub:     "パスカルの法則マスター！🏆",
-    winLesson:  "パスカルの法則：P = F ÷ A\n流体の中で圧力はすべての方向に同じように広がる！\n⚙️ ユーケン油圧製品は毎日これを使っています！",
-    loseTitle:  "モフモフがまだ捕まってる！",
-    loseHint:   "💡 覚えよう：P = F ÷ A\n圧力 = 力 ÷ 面積",
-    qLabel:     "問",
-    score:      "⭐",
+  tips: [
+    '⚙️ Real hydraulic systems power aircraft, excavators & factories!',
+    '💧 Pascal\'s Law: Pressure in a fluid spreads equally in ALL directions!',
+    '🔧 Yuken hydraulic pumps generate up to 350 bar of pressure!',
+    '🏗️ A small hydraulic force can lift cars, cranes — even skyscrapers!',
+  ],
+  failMsgs: [
+    '😱 The businessman is still dangling!\n🌭 Toilet landed in a hotdog cart!',
+    '💥 OVERPRESSURE! Pod flew to the MOON!\n🚀 That\'s not the rescue target...',
+    '🐦 Pigeons hijacked your rescue pod!\n😂 Try a different pressure level!',
+    '💩 Wrong floor! That was the JANITOR\'S toilet!\n🤣 Adjust your pressure!',
+    '😅 Pod bounced off a billboard!\n📢 "YUKEN: Even our FAILURES are powerful!"',
+  ],
+  winTitle:  '🎉 BUSINESSMAN RESCUED!',
+  winHint:   '⚙️ Real Yuken hydraulic systems use this pressure to power factories!',
+};
+/* ═══════════════════════════════════════════════════════════ */
+
+const W = 800, H = 520;
+
+/* ────────────────────── MENU SCENE ────────────────────── */
+class MenuScene extends Phaser.Scene {
+  constructor() { super({ key: 'MenuScene' }); }
+
+  create() {
+    this.cameras.main.fadeIn(600);
+    const g = this.add.graphics();
+
+    // Sky
+    g.fillGradientStyle(0x0d3b6e, 0x0d3b6e, 0x1a6faf, 0x1a6faf, 1);
+    g.fillRect(0, 0, W, H);
+
+    // City silhouette
+    const blds = [
+      [0,340,70,180],[80,300,55,220],[150,320,80,200],[260,350,50,170],
+      [590,310,65,210],[670,290,80,230],[760,320,60,200],
+    ];
+    g.fillStyle(0x0a1628);
+    blds.forEach(([x,y,w,h]) => {
+      g.fillRect(x, y, w, h);
+      // Windows
+      for (let wy=y+12; wy<y+h-10; wy+=24)
+        for (let wx=x+8; wx<x+w-8; wx+=18) {
+          g.fillStyle(Math.random()>0.4 ? 0xFFDD88 : 0x334466, 0.6);
+          g.fillRect(wx, wy, 9, 13);
+        }
+    });
+
+    // Ground
+    g.fillStyle(0x1a1a0e); g.fillRect(0, H-30, W, 30);
+    g.fillStyle(0x2a2a1e); g.fillRect(0, H-33, W, 5);
+
+    // Stars
+    for (let i=0; i<60; i++) {
+      const s = Math.random()*2+0.5;
+      g.fillStyle(0xffffff, Math.random()*0.7+0.3);
+      g.fillCircle(Math.random()*W, Math.random()*150, s);
+    }
+
+    // Animated clouds
+    this._clouds = [];
+    [[120,55],[310,40],[560,65],[700,45]].forEach(([x,y]) => {
+      const cg = this.add.graphics();
+      cg.fillStyle(0xffffff, 0.12);
+      cg.fillCircle(0,0,35); cg.fillCircle(28,8,26);
+      cg.fillCircle(-24,10,22); cg.fillCircle(12,-14,20);
+      cg.setPosition(x, y);
+      this._clouds.push({ g: cg, spd: 8+Math.random()*8 });
+    });
+
+    // Spinning toilet
+    const toilet = this.add.text(W/2, 68, '🚽', { fontSize: '70px' }).setOrigin(0.5);
+    this.tweens.add({ targets: toilet, y: 80, duration: 900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    this.tweens.add({ targets: toilet, angle: -10, duration: 1100, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+
+    // Title
+    const t1 = this.add.text(W/2, 162, 'HYDRAULIC MAYHEM', {
+      fontSize: '50px', fontFamily: 'Fredoka One, Arial Black',
+      color: '#FFE135', stroke: '#000', strokeThickness: 9
+    }).setOrigin(0.5);
+    this.tweens.add({ targets: t1, y: 157, duration: 1300, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+
+    this.add.text(W/2, 218, '🚽  TOILET  RESCUE  🚽', {
+      fontSize: '28px', fontFamily: 'Fredoka One, Arial Black',
+      color: '#FF6B6B', stroke: '#000', strokeThickness: 5
+    }).setOrigin(0.5);
+
+    // PLAY button
+    this._btn(W/2, 308, 240, 68, 0xCC2222, '🚀  PLAY NOW!', 36, () => {
+      this.cameras.main.fadeOut(300);
+      this.time.delayedCall(300, () => this.scene.start('GameScene'));
+    });
+
+    // HOW TO PLAY button
+    this._btn(W/2, 388, 200, 46, 0x226699, '❓ How to Play', 22, () => {
+      this._howToPlay();
+    });
+
+    // Best score
+    const best = localStorage.getItem('hm_best') || '---';
+    this.add.text(W/2, 450, `🏆 Best Score: ${best}`, {
+      fontSize: '22px', fontFamily: 'Fredoka One', color: '#FFE135', stroke: '#000', strokeThickness: 3
+    }).setOrigin(0.5);
+
+    // Brand + tip
+    const tip = Phaser.Utils.Array.GetRandom(CONTENT.tips);
+    this.add.text(W/2, 492, '⚙️ ' + CONTENT.brand.name + ' · ' + tip, {
+      fontSize: '10px', fontFamily: 'Arial', color: '#7799bb', align: 'center', wordWrap: { width: W-40 }
+    }).setOrigin(0.5);
   }
+
+  _howToPlay() {
+    const ov = this.add.graphics();
+    ov.fillStyle(0x000000, 0.82); ov.fillRect(0, 0, W, H);
+
+    const box = this.add.graphics();
+    box.fillStyle(0x1a3a5e); box.fillRoundedRect(W/2-220, H/2-200, 440, 400, 20);
+    box.lineStyle(3, 0x88CCFF); box.strokeRoundedRect(W/2-220, H/2-200, 440, 400, 20);
+
+    const lines = [
+      '🚽 HOW TO PLAY',
+      '',
+      'HOLD the big red button to charge',
+      'hydraulic pressure, then RELEASE to fire!',
+      '',
+      '🔵 LOW  pressure → short, weak shot',
+      '🟢 PERFECT pressure → rescue arc! 🎯',
+      '🔴 OVER pressure → CHAOS & explosions! 💥',
+      '',
+      'Hit 🌀 FANS & 🐦 BIRDS for bonus score!',
+      'Land on the 🎯 platform to rescue him!',
+      '',
+      '⚙️ YK-500 · ' + CONTENT.brand.tagline,
+    ];
+    const txt = this.add.text(W/2, H/2-150, lines.join('\n'), {
+      fontSize: '15px', fontFamily: 'Fredoka One, Arial', color: '#ffffff',
+      align: 'center', lineSpacing: 8, stroke: '#000', strokeThickness: 2
+    }).setOrigin(0.5, 0);
+
+    const closeG = this.add.graphics();
+    closeG.fillStyle(0xFF4444); closeG.fillRoundedRect(W/2-70, H/2+165, 140, 40, 10);
+    closeG.lineStyle(2, 0x000); closeG.strokeRoundedRect(W/2-70, H/2+165, 140, 40, 10);
+    const closeT = this.add.text(W/2, H/2+185, '✔ Got it!', {
+      fontSize: '20px', fontFamily: 'Fredoka One', color: '#fff', stroke: '#000', strokeThickness: 2
+    }).setOrigin(0.5);
+
+    const hit = this.add.rectangle(W/2, H/2+185, 140, 40).setInteractive().setAlpha(0.001);
+    hit.on('pointerdown', () => { [ov, box, txt, closeG, closeT, hit].forEach(o => o.destroy()); });
+  }
+
+  _btn(cx, cy, bw, bh, col, label, fs, cb) {
+    const g = this.add.graphics();
+    const draw = (c) => {
+      g.clear();
+      g.fillStyle(c); g.fillRoundedRect(cx-bw/2, cy-bh/2, bw, bh, 14);
+      g.lineStyle(4, 0x000); g.strokeRoundedRect(cx-bw/2, cy-bh/2, bw, bh, 14);
+    };
+    draw(col);
+    const t = this.add.text(cx, cy, label, {
+      fontSize: fs+'px', fontFamily: 'Fredoka One, Arial Black', color: '#fff', stroke: '#000', strokeThickness: 4
+    }).setOrigin(0.5);
+    const hit = this.add.rectangle(cx, cy, bw, bh).setInteractive().setAlpha(0.001);
+    hit.on('pointerover', () => { draw(col+0x181818); this.tweens.add({ targets: [g, t], scaleX: 1.04, scaleY: 1.04, duration: 80 }); });
+    hit.on('pointerout',  () => { draw(col);           this.tweens.add({ targets: [g, t], scaleX: 1,    scaleY: 1,    duration: 80 }); });
+    hit.on('pointerdown', () => {
+      this.cameras.main.shake(80, 0.005);
+      this.tweens.add({ targets: t, scaleX: 0.92, scaleY: 0.92, duration: 80, yoyo: true });
+      cb();
+    });
+  }
+
+  update(t) {
+    this._clouds.forEach(c => {
+      c.g.x -= c.spd * (1/60);
+      if (c.g.x < -120) c.g.x = W + 60;
+    });
+  }
+}
+
+/* ────────────────────── GAME SCENE ────────────────────── */
+class GameScene extends Phaser.Scene {
+  constructor() { super({ key: 'GameScene' }); }
+
+  init() {
+    this.pressure    = 0;
+    this.isCharging  = false;
+    this.launched    = false;
+    this.gameOver    = false;
+    this.score       = 0;
+    this.combo       = 1;
+    this.airtime     = 0;
+    this.pod         = null;
+    this.podEmoji    = null;
+    this.fanAngle    = [0, 45];
+    this.birdTimer   = 2000;
+    this.birds       = [];
+    this.billboardHit= false;
+    this.craneDir    = 1;
+    this.craneAng    = 0;
+    this.trailPts    = [];
+    this.clouds      = [];
+  }
+
+  create() {
+    this.cameras.main.fadeIn(500);
+
+    /* ── BACKGROUND ──────────────────────────────────── */
+    const sky = this.add.graphics();
+    sky.fillGradientStyle(0x87CEEB, 0x87CEEB, 0xC8E8FF, 0xC8E8FF, 1);
+    sky.fillRect(0, 0, W, H);
+
+    // Sun + rays
+    const sunG = this.add.graphics();
+    sunG.fillStyle(0xFFE135); sunG.fillCircle(W-80, 60, 36);
+    sunG.fillStyle(0xFFCC00); sunG.fillCircle(W-80, 60, 28);
+    for (let i=0; i<8; i++) {
+      const a = i*Math.PI/4;
+      sunG.lineStyle(3, 0xFFDD44, 0.7);
+      sunG.beginPath();
+      sunG.moveTo(W-80+Math.cos(a)*40, 60+Math.sin(a)*40);
+      sunG.lineTo(W-80+Math.cos(a)*58, 60+Math.sin(a)*58);
+      sunG.strokePath();
+    }
+
+    // Animated clouds
+    [[100,55,0.5],[290,42,0.7],[490,60,0.4],[660,48,0.6]].forEach(([x,y,spd]) => {
+      const cg = this.add.graphics();
+      cg.fillStyle(0xffffff, 0.88);
+      cg.fillCircle(0,0,30); cg.fillCircle(26,8,22); cg.fillCircle(-22,10,18); cg.fillCircle(12,-12,16);
+      cg.setPosition(x, y);
+      this.clouds.push({ g: cg, spd });
+    });
+
+    // Ground
+    const gnd = this.add.graphics();
+    gnd.fillStyle(0x4a7a2a); gnd.fillRect(0, H-45, W, 45);
+    gnd.fillStyle(0x5a8a3a); gnd.fillRect(0, H-48, W, 5);
+    gnd.fillStyle(0x557722); gnd.fillRect(0, H-30, W, 8);
+    for (let x=0; x<W; x+=65) { gnd.fillStyle(0xFFFF88,0.4); gnd.fillRect(x, H-22, 40, 6); }
+
+    // Ground static body
+    const groundRect = this.add.rectangle(W/2, H-22, W, 45).setVisible(false);
+    this.physics.add.existing(groundRect, true);
+    this.groundBody = groundRect;
+
+    /* ── SKYSCRAPER ──────────────────────────────────── */
+    const bx=590, bw=130, bTop=30;
+    const bld = this.add.graphics();
+
+    // Shadow
+    bld.fillStyle(0x000000, 0.18); bld.fillRect(bx+8, bTop+8, bw, H-45-bTop);
+
+    // Main building
+    bld.fillStyle(0x4a6fa5); bld.fillRect(bx, bTop, bw, H-45-bTop);
+    bld.fillStyle(0x5a7fb5); bld.fillRect(bx, bTop, bw, 6); // top trim
+
+    // Glass panels
+    bld.fillStyle(0x3a5f95, 0.5);
+    for (let py=bTop+12; py<H-60; py+=32) bld.fillRect(bx+2, py, bw-4, 2);
+
+    // Windows
+    for (let row=bTop+14; row<H-60; row+=28) {
+      for (let col=bx+10; col<bx+bw-10; col+=24) {
+        bld.fillStyle(0xFFDD88, 0.85); bld.fillRect(col, row, 12, 14);
+        bld.fillStyle(0xffffff, 0.3); bld.fillRect(col, row, 5, 4);
+      }
+    }
+
+    // Outline
+    bld.lineStyle(3, 0x2a4a7a); bld.strokeRect(bx, bTop, bw, H-45-bTop);
+
+    // "TOILET CRISIS!" sign
+    const signG = this.add.graphics();
+    signG.fillStyle(0xFF2222); signG.fillRoundedRect(bx-8, bTop-30, bw+16, 28, 6);
+    signG.lineStyle(2, 0x000); signG.strokeRoundedRect(bx-8, bTop-30, bw+16, 28, 6);
+    this.add.text(bx+bw/2, bTop-16, '🚨 TOILET CRISIS! 🚨', {
+      fontSize: '11px', fontFamily: 'Arial Black', color: '#fff', stroke: '#000', strokeThickness: 2
+    }).setOrigin(0.5);
+
+    /* ── CRANE ─────────────────────────────────────── */
+    this.craneG = this.add.graphics();
+    this._drawCrane();
+
+    /* ── HANGING TOILET ──────────────────────────────── */
+    this.hangX = bx - 36;
+    this.hangBase = 155;
+    this.hangContainer = this.add.container(this.hangX, this.hangBase);
+    const rope = this.add.graphics();
+    rope.lineStyle(4, 0x8B4513);
+    rope.beginPath(); rope.moveTo(0, -35); rope.lineTo(0, 2); rope.strokePath();
+    this.businessmanTxt = this.add.text(0, 2, '🚽\n😱', {
+      fontSize: '32px', align: 'center', stroke: '#000', strokeThickness: 1
+    }).setOrigin(0.5, 0);
+    this.hangContainer.add([rope, this.businessmanTxt]);
+
+    /* ── RESCUE PLATFORM ──────────────────────────────── */
+    this.platX = bx - 80;
+    this.platY = 262;
+    this.platformG = this.add.graphics();
+    this._drawPlatform();
+
+    // Physics body for platform (bigger hitbox to catch pod)
+    this.platRect = this.add.rectangle(this.platX+45, this.platY+6, 90, 28).setVisible(false);
+    this.physics.add.existing(this.platRect, true);
+
+    /* ── BILLBOARD ───────────────────────────────────── */
+    this.bbX = 490; this.bbY = 195;
+    this.billboardG = this.add.graphics();
+    this._drawBillboard(0);
+    this.add.text(this.bbX, this.bbY+15, 'YUKEN\nHYDRAULICS', {
+      fontSize: '10px', fontFamily: 'Arial Black', color: '#000', align: 'center'
+    }).setOrigin(0.5);
+
+    /* ── LAUNCHER MACHINE ─────────────────────────────── */
+    this.machineX = 98;
+    this.machineY = 310;
+    this.machineG   = this.add.graphics();
+    this.pistonG    = this.add.graphics();
+    this.gaugeNeedle= this.add.graphics();
+    this._drawMachine(0);
+
+    // Barrel tip: where pod launches from
+    this.launchX = 175;
+    this.launchY = 258;
+
+    // Direction arrow preview
+    this.arrowG = this.add.graphics();
+
+    /* ── FANS ────────────────────────────────────────── */
+    this.fanObjs = [];
+    [[330, 195, 0x994444, 32], [460, 305, 0x444499, 28]].forEach(([fx, fy, col, r]) => {
+      const fg = this.add.graphics();
+      fg.setPosition(fx, fy);
+      this.fanObjs.push({ g: fg, x: fx, y: fy, col, r, hit: r+14 });
+    });
+
+    /* ── HUD ─────────────────────────────────────────── */
+    this._buildHUD();
+
+    /* ── HOLD BUTTON ─────────────────────────────────── */
+    this._buildHoldButton();
+
+    /* ── TRAIL GRAPHIC ───────────────────────────────── */
+    this.trailG = this.add.graphics();
+
+    /* ── INPUT ───────────────────────────────────────── */
+    this.input.on('pointerup', () => this._onRelease(), this);
+
+    // Kick off first bird
+    this.birdTimer = 3000;
+
+    // Intro hint
+    this._toast('😱 Rescue the businessman!\nHOLD the button to charge pressure!', 3500, '#FFE135');
+  }
+
+  /* ── CRANE ─────────────────────────────────────────── */
+  _drawCrane() {
+    const cx = 590, cy = 30;
+    this.craneG.clear();
+    this.craneG.lineStyle(7, 0x888888);
+    const tx = cx-10 + Math.cos(this.craneAng)*75;
+    const ty = cy + Math.sin(this.craneAng)*35;
+    this.craneG.beginPath(); this.craneG.moveTo(cx-10, cy); this.craneG.lineTo(tx, ty); this.craneG.strokePath();
+    this.craneG.lineStyle(3, 0xaaaaaa);
+    this.craneG.beginPath(); this.craneG.moveTo(tx, ty); this.craneG.lineTo(tx, ty+22); this.craneG.strokePath();
+    this.craneG.lineStyle(4, 0x666666); this.craneG.strokeCircle(tx+5, ty+28, 8);
+  }
+
+  /* ── PLATFORM ───────────────────────────────────────── */
+  _drawPlatform() {
+    this.platformG.clear();
+    // Glow
+    this.platformG.fillStyle(0x22FF66, 0.25); this.platformG.fillRect(this.platX-5, this.platY-8, 100, 30);
+    this.platformG.fillStyle(0x22CC55); this.platformG.fillRect(this.platX, this.platY, 90, 14);
+    this.platformG.lineStyle(3, 0x000); this.platformG.strokeRect(this.platX, this.platY, 90, 14);
+    // Stripes
+    for (let i=0; i<5; i++) {
+      this.platformG.fillStyle(0xffffff, 0.3);
+      this.platformG.fillRect(this.platX+8+i*16, this.platY+2, 8, 10);
+    }
+    this.add.text(this.platX+45, this.platY-16, '🎯 LAND HERE', {
+      fontSize: '10px', fontFamily: 'Arial Black', color: '#22CC55', stroke: '#000', strokeThickness: 2
+    }).setOrigin(0.5);
+  }
+
+  /* ── BILLBOARD ──────────────────────────────────────── */
+  _drawBillboard(angle) {
+    this.billboardG.clear();
+    if (this.billboardHit) {
+      this.billboardG.fillStyle(0x888888, 0.4);
+      this.billboardG.fillRect(this.bbX-30, this.bbY+40, 60, 6);
+      return;
+    }
+    this.billboardG.save();
+    this.billboardG.fillStyle(0xFFFF44); this.billboardG.fillRect(this.bbX-32, this.bbY, 64, 36);
+    this.billboardG.lineStyle(3, 0x000); this.billboardG.strokeRect(this.bbX-32, this.bbY, 64, 36);
+    this.billboardG.fillStyle(0x555555); this.billboardG.fillRect(this.bbX-3, this.bbY+36, 6, 28);
+    this.billboardG.restore();
+  }
+
+  /* ── LAUNCHER ───────────────────────────────────────── */
+  _drawMachine(pressureAmt) {
+    const mx = this.machineX, my = this.machineY;
+
+    this.machineG.clear();
+    // Shadow
+    this.machineG.fillStyle(0x000000, 0.2);
+    this.machineG.fillEllipse(mx, my+55, 150, 20);
+
+    // Legs
+    this.machineG.fillStyle(0x3a3a3a);
+    this.machineG.fillRect(mx-55, my+35, 22, 28); this.machineG.fillRect(mx+33, my+35, 22, 28);
+    // Feet
+    this.machineG.fillStyle(0x555);
+    this.machineG.fillRect(mx-62, my+58, 36, 8); this.machineG.fillRect(mx+26, my+58, 36, 8);
+
+    // Main body
+    this.machineG.fillStyle(0x666666); this.machineG.fillRoundedRect(mx-58, my-45, 116, 85, 12);
+    this.machineG.fillStyle(0x777777); this.machineG.fillRoundedRect(mx-55, my-42, 110, 79, 10);
+    this.machineG.lineStyle(3, 0x222); this.machineG.strokeRoundedRect(mx-58, my-45, 116, 85, 12);
+
+    // Rivets
+    this.machineG.fillStyle(0x444);
+    [[mx-48, my-35],[mx+42, my-35],[mx-48, my+25],[mx+42, my+25]].forEach(([bx,by]) => {
+      this.machineG.fillCircle(bx, by, 5);
+      this.machineG.lineStyle(1, 0x888); this.machineG.strokeCircle(bx, by, 5);
+    });
+
+    // Pressure gauge
+    this.machineG.fillStyle(0xDDDDDD); this.machineG.fillCircle(mx-28, my-12, 22);
+    this.machineG.lineStyle(2, 0x333); this.machineG.strokeCircle(mx-28, my-12, 22);
+    // Zone arcs
+    this.machineG.lineStyle(4, 0x4488FF, 0.7);
+    this.machineG.beginPath(); this.machineG.arc(mx-28, my-12, 16, Math.PI*0.9, Math.PI*1.4); this.machineG.strokePath();
+    this.machineG.lineStyle(4, 0x22CC55, 0.7);
+    this.machineG.beginPath(); this.machineG.arc(mx-28, my-12, 16, Math.PI*1.4, Math.PI*1.9); this.machineG.strokePath();
+    this.machineG.lineStyle(4, 0xFF4444, 0.7);
+    this.machineG.beginPath(); this.machineG.arc(mx-28, my-12, 16, Math.PI*1.9, Math.PI*2.4); this.machineG.strokePath();
+
+    // Barrel (angled ~-28deg from horizontal)
+    const barAngle = -0.49; // radians
+    const barLen = 80, barThick = 14;
+    const bx1=mx+22, by1=my-8;
+    this.machineG.fillStyle(0x555555);
+    // Draw barrel as a rotated quad
+    const cos=Math.cos(barAngle), sin=Math.sin(barAngle);
+    const pts = [
+      [bx1 - sin*barThick/2, by1 + cos*barThick/2],
+      [bx1 - sin*barThick/2 + cos*barLen, by1 + cos*barThick/2 + sin*barLen],
+      [bx1 + sin*barThick/2 + cos*barLen, by1 - cos*barThick/2 + sin*barLen],
+      [bx1 + sin*barThick/2, by1 - cos*barThick/2],
+    ];
+    this.machineG.fillPoints(pts.map(([x,y]) => ({ x, y })), true);
+    this.machineG.lineStyle(2, 0x333);
+    this.machineG.strokePoints(pts.map(([x,y]) => ({ x, y })), true);
+
+    // Barrel mouth
+    this.machineG.fillStyle(0x333);
+    this.machineG.fillCircle(bx1+cos*barLen, by1+sin*barLen, 9);
+
+    // YK-500 label
+    this.machineG.fillStyle(0x222, 0.6); this.machineG.fillRoundedRect(mx-20, my+8, 74, 16, 4);
+
+    // Piston cylinder
+    this.pistonG.clear();
+    const compress = pressureAmt * 0.3;
+    this.pistonG.fillStyle(0x888888); this.pistonG.fillRect(mx-14, my-45-compress-35, 28, 32+compress);
+    this.pistonG.lineStyle(2, 0x555); this.pistonG.strokeRect(mx-14, my-45-compress-35, 28, 32+compress);
+    // Rod
+    this.pistonG.fillStyle(0xCCCCCC); this.pistonG.fillRect(mx-7, my-78, 14, 8);
+    this.pistonG.lineStyle(1, 0x888); this.pistonG.strokeRect(mx-7, my-78, 14, 8);
+    // Steam puffs when over-pressure
+    if (pressureAmt > 66) {
+      this.pistonG.fillStyle(0xffffff, 0.4);
+      for (let i=0; i<3; i++) {
+        const r = 4+i*3;
+        this.pistonG.fillCircle(mx+18+i*8, my-68-i*4, r);
+      }
+    }
+
+    // Gauge needle
+    this.gaugeNeedle.clear();
+    const needleAng = Math.PI*0.9 + (pressureAmt/100)*Math.PI*1.5;
+    const nx = mx-28, ny = my-12;
+    this.gaugeNeedle.lineStyle(2, 0xFF2222);
+    this.gaugeNeedle.beginPath();
+    this.gaugeNeedle.moveTo(nx, ny);
+    this.gaugeNeedle.lineTo(nx+Math.cos(needleAng)*15, ny+Math.sin(needleAng)*15);
+    this.gaugeNeedle.strokePath();
+    this.gaugeNeedle.fillStyle(0x333); this.gaugeNeedle.fillCircle(nx, ny, 3);
+  }
+
+  /* ── HUD ─────────────────────────────────────────────── */
+  _buildHUD() {
+    // Pressure meter at bottom
+    const pH = H-40;
+    this.pressureBgG = this.add.graphics();
+    this.pressureBgG.fillStyle(0x222222, 0.85); this.pressureBgG.fillRoundedRect(60, pH-12, W-120, 24, 12);
+    this.pressureBgG.lineStyle(2, 0x555); this.pressureBgG.strokeRoundedRect(60, pH-12, W-120, 24, 12);
+
+    // Zone separators
+    const barW = W-120, bx0=60;
+    this.pressureBgG.lineStyle(1, 0xffffff, 0.3);
+    this.pressureBgG.beginPath(); this.pressureBgG.moveTo(bx0+barW*0.33, pH-10); this.pressureBgG.lineTo(bx0+barW*0.33, pH+12); this.pressureBgG.strokePath();
+    this.pressureBgG.beginPath(); this.pressureBgG.moveTo(bx0+barW*0.66, pH-10); this.pressureBgG.lineTo(bx0+barW*0.66, pH+12); this.pressureBgG.strokePath();
+
+    this.pressureFill = this.add.graphics();
+
+    // Zone labels
+    const lblY = H-12;
+    this.add.text(60+barW*0.165, lblY, '🔵 LOW', { fontSize: '9px', fontFamily: 'Arial Black', color: '#88aaff', stroke: '#000', strokeThickness: 1 }).setOrigin(0.5);
+    this.add.text(60+barW*0.495, lblY, '🟢 PERFECT', { fontSize: '9px', fontFamily: 'Arial Black', color: '#44ff88', stroke: '#000', strokeThickness: 1 }).setOrigin(0.5);
+    this.add.text(60+barW*0.83,  lblY, '🔴 OVER!', { fontSize: '9px', fontFamily: 'Arial Black', color: '#ff6644', stroke: '#000', strokeThickness: 1 }).setOrigin(0.5);
+
+    // Score (top-right)
+    this.scoreTxt = this.add.text(W-10, 10, '⭐ 0', {
+      fontSize: '24px', fontFamily: 'Fredoka One', color: '#FFE135', stroke: '#000', strokeThickness: 4
+    }).setOrigin(1, 0);
+
+    // Combo (below score)
+    this.comboTxt = this.add.text(W-10, 40, '', {
+      fontSize: '16px', fontFamily: 'Fredoka One', color: '#FF6B6B', stroke: '#000', strokeThickness: 2
+    }).setOrigin(1, 0).setAlpha(0);
+
+    // Level label (top-left)
+    this.add.text(10, 10, '🏢 Lv.1  Skyscraper Toilet Disaster', {
+      fontSize: '12px', fontFamily: 'Arial', color: '#fff', stroke: '#000', strokeThickness: 2
+    });
+  }
+
+  /* ── HOLD BUTTON ─────────────────────────────────────── */
+  _buildHoldButton() {
+    const bx = W/2, by = H-40;
+    this.holdG = this.add.graphics();
+    this._redrawHold(false);
+    this.holdTxt = this.add.text(bx, by, '🔴 HOLD', {
+      fontSize: '18px', fontFamily: 'Fredoka One', color: '#fff', stroke: '#000', strokeThickness: 3
+    }).setOrigin(0.5);
+
+    const hit = this.add.rectangle(bx, by, 110, 38).setInteractive().setAlpha(0.001).setDepth(99);
+    hit.on('pointerdown', () => this._startCharge());
+    hit.on('pointerup',   () => this._onRelease());
+    hit.on('pointerout',  () => this._onRelease());
+    this.holdHit = hit;
+  }
+
+  _redrawHold(active) {
+    const bx=W/2, by=H-40;
+    this.holdG.clear();
+    this.holdG.fillStyle(active ? 0xAA0000 : 0xFF2222);
+    this.holdG.fillRoundedRect(bx-55, by-19, 110, 38, 10);
+    this.holdG.lineStyle(3, 0x000); this.holdG.strokeRoundedRect(bx-55, by-19, 110, 38, 10);
+  }
+
+  _startCharge() {
+    if (this.launched || this.gameOver) return;
+    this.isCharging = true;
+    this._redrawHold(true);
+    this.holdTxt.setText('⚡ CHARGING...');
+  }
+
+  _onRelease() {
+    if (!this.isCharging || this.launched || this.gameOver) return;
+    this.isCharging = false;
+    this._redrawHold(false);
+    this._launch();
+  }
+
+  /* ── LAUNCH ──────────────────────────────────────────── */
+  _launch() {
+    if (this.launched) return;
+    this.launched = true;
+
+    const p = this.pressure;
+    let vx, vy;
+
+    if (p < 33) {
+      // Low — falls short
+      vx = 150 + p*4;
+      vy = -(80  + p*3);
+    } else if (p < 66) {
+      // Perfect — arc to platform
+      const t = (p-33)/33; // 0..1
+      vx = 370 + t*90;
+      vy = -(220 + t*60);
+    } else {
+      // Over — chaos!
+      const t = (p-66)/34;
+      vx = 460 + t*280;
+      vy = -(280 + t*200);
+    }
+
+    // Create pod (emoji text with physics)
+    this.pod = this.add.text(this.launchX, this.launchY, '🚽', {
+      fontSize: '30px', stroke: '#000', strokeThickness: 1
+    }).setOrigin(0.5);
+    this.physics.add.existing(this.pod);
+    this.pod.body.setVelocity(vx, vy);
+    this.pod.body.setCollideWorldBounds(false);
+
+    // Collide with ground
+    this.physics.add.collider(this.pod, this.groundBody, () => this._onGroundHit());
+    // Overlap platform
+    this.physics.add.overlap(this.pod, this.platRect, () => this._onPlatformHit());
+
+    // Camera shake + effects
+    this.cameras.main.shake(350, 0.012);
+    this._spawnExplosion(this.launchX-20, this.launchY, 5, ['💨','⚡','🌟']);
+
+    if (p >= 66) {
+      // Over-pressure chaos
+      this.cameras.main.shake(600, 0.025);
+      this._spawnExplosion(this.machineX, this.machineY, 8, ['💥','🔥','⚡','💨']);
+      this._toast('💥 OVERPRESSURE!! CHAOS MODE!!', 1600, '#FF6644');
+    } else if (p >= 33) {
+      this._toast('⚡ PERFECT PRESSURE! TURBO LAUNCH!', 1500, '#22FF88');
+    } else {
+      this._toast('😅 Too weak... more pressure next time!', 1800, '#88AAFF');
+    }
+
+    this.holdTxt.setText('⏳ In flight...');
+    this.holdHit.disableInteractive();
+    this.arrowG.clear();
+    this.pressure = 0;
+    this._updatePressureBar(0);
+  }
+
+  /* ── FANS ────────────────────────────────────────────── */
+  _updateFans(dt) {
+    this.fanObjs.forEach((fan, i) => {
+      this.fanAngle[i] += (i===0 ? 3.5 : -2.8);
+      const g = fan.g; g.clear();
+      for (let b=0; b<4; b++) {
+        const a = (this.fanAngle[i] + b*90) * Math.PI/180;
+        g.fillStyle(fan.col, 0.88);
+        g.fillTriangle(
+          Math.cos(a)*6, Math.sin(a)*6,
+          Math.cos(a+0.35)*fan.r, Math.sin(a+0.35)*fan.r,
+          Math.cos(a-0.35)*fan.r, Math.sin(a-0.35)*fan.r
+        );
+      }
+      g.fillStyle(0x888888); g.fillCircle(0,0,8);
+      g.lineStyle(2, 0x444); g.strokeCircle(0,0,8);
+
+      // Fan hub mount
+      g.fillStyle(0x555); g.fillRect(-3,-fan.r-8,6,10);
+
+      // Pod collision
+      if (this.pod && !this.gameOver) {
+        const dx = this.pod.x - fan.x, dy = this.pod.y - fan.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < fan.hit) {
+          const nx=dx/dist, ny=dy/dist;
+          this.pod.body.setVelocity(
+            this.pod.body.velocity.x + nx*180 + (i===0?-60:60),
+            this.pod.body.velocity.y + ny*100 - 80
+          );
+          this._addScore(60, fan.x, fan.y, '🌀 FAN!');
+          this.cameras.main.shake(180, 0.007);
+        }
+      }
+    });
+  }
+
+  /* ── BIRDS ───────────────────────────────────────────── */
+  _updateBirds(dt) {
+    this.birdTimer -= dt;
+    if (this.birdTimer <= 0) {
+      this.birdTimer = Phaser.Math.Between(2500, 5000);
+      const y = Phaser.Math.Between(70, 200);
+      const fromLeft = Math.random() > 0.5;
+      const brd = this.add.text(fromLeft ? -30 : W+30, y, '🐦', { fontSize: '22px' });
+      this.birds.push(brd);
+      this.tweens.add({
+        targets: brd,
+        x: fromLeft ? W+50 : -50,
+        duration: Phaser.Math.Between(2200, 3800),
+        onComplete: () => { const idx=this.birds.indexOf(brd); if(idx>-1)this.birds.splice(idx,1); brd.destroy(); }
+      });
+    }
+
+    if (this.pod && !this.gameOver) {
+      this.birds.forEach(b => {
+        if (!b.active) return;
+        const dx=this.pod.x-b.x, dy=this.pod.y-b.y;
+        if (Math.sqrt(dx*dx+dy*dy) < 28) {
+          this.tweens.killTweensOf(b);
+          b.setText('💀');
+          this.tweens.add({ targets: b, y: b.y+70, alpha:0, duration:800, onComplete:()=>b.destroy() });
+          this.pod.body.velocity.y -= 60;
+          this._addScore(40, b.x, b.y, '🐦 BIRD!');
+        }
+      });
+    }
+  }
+
+  /* ── BILLBOARD COLLISION ─────────────────────────────── */
+  _checkBillboard() {
+    if (this.billboardHit || !this.pod || this.gameOver) return;
+    const dx=this.pod.x-this.bbX, dy=this.pod.y-(this.bbY+18);
+    if (Math.abs(dx)<40 && Math.abs(dy)<25) {
+      this.billboardHit = true;
+      this._drawBillboard(0);
+      this.pod.body.velocity.x *= -0.4;
+      this.pod.body.velocity.y *= -0.3;
+      this._addScore(80, this.bbX, this.bbY, '📢 BILLBOARD!');
+      this.cameras.main.shake(250, 0.01);
+      this._spawnExplosion(this.bbX, this.bbY, 5, ['💥','📢','🌟']);
+    }
+  }
+
+  /* ── SCORE ───────────────────────────────────────────── */
+  _addScore(pts, x, y, label) {
+    const earned = Math.round(pts * this.combo);
+    this.score += earned;
+    this.scoreTxt.setText('⭐ ' + this.score);
+    this.combo = Math.min(this.combo + 0.5, 6);
+    this.comboTxt.setText('x' + this.combo.toFixed(1) + ' COMBO!').setAlpha(1);
+    this.tweens.add({ targets: this.comboTxt, alpha: 0, duration: 1400, delay: 500 });
+
+    // Floating popup
+    const pop = this.add.text(x||W/2, y||H/2, '+'+earned+' '+label, {
+      fontSize: '18px', fontFamily: 'Fredoka One', color: '#FFE135', stroke: '#000', strokeThickness: 3
+    }).setOrigin(0.5).setDepth(90);
+    this.tweens.add({ targets: pop, y: (y||H/2)-55, alpha: 0, duration: 1000, onComplete: () => pop.destroy() });
+  }
+
+  /* ── WIN ─────────────────────────────────────────────── */
+  _onPlatformHit() {
+    if (this.gameOver) return;
+    this.gameOver = true;
+
+    // Bonus for airtime + remaining speed
+    const bonus = Math.round(this.airtime/8) + 200;
+    this._addScore(bonus, this.platX+45, this.platY, '🎯 RESCUE!');
+
+    const best = parseInt(localStorage.getItem('hm_best')||'0');
+    if (this.score > best) localStorage.setItem('hm_best', this.score);
+
+    this.physics.pause();
+    this.pod.setText('🎊');
+    this.businessmanTxt.setText('😁\n🎉');
+
+    this.cameras.main.shake(500, 0.018);
+    this._spawnCelebration();
+
+    this.time.delayedCall(500, () => {
+      this._showEndPanel(true);
+    });
+  }
+
+  /* ── FAIL ─────────────────────────────────────────────── */
+  _onGroundHit() {
+    if (this.gameOver) return;
+    if (Math.abs(this.pod.body.velocity.x) < 10 && Math.abs(this.pod.body.velocity.y) < 30) {
+      // Genuinely stopped
+      if (this.gameOver) return;
+      this.gameOver = true;
+      this.physics.pause();
+      this._spawnExplosion(this.pod.x, this.pod.y, 6, ['💥','🌭','😂']);
+      this.pod.setText('💥');
+      this.time.delayedCall(600, () => this._showEndPanel(false));
+    }
+  }
+
+  _checkOutOfBounds() {
+    if (!this.pod || this.gameOver) return;
+    if (this.pod.x > W+80 || this.pod.x < -80 || this.pod.y > H+80) {
+      this.gameOver = true;
+      this.physics.pause();
+      this.pod.setText('🚀');
+      this._spawnExplosion(this.pod.x, this.pod.y, 5, ['🚀','💫','⭐']);
+      this.time.delayedCall(400, () => this._showEndPanel(false));
+    }
+  }
+
+  /* ── END PANEL ───────────────────────────────────────── */
+  _showEndPanel(won) {
+    const ov = this.add.graphics().setDepth(200);
+    ov.fillStyle(0x000000, 0.7); ov.fillRect(0, 0, W, H);
+
+    const bx=W/2, by=H/2-30;
+    const panG = this.add.graphics().setDepth(201);
+    panG.fillStyle(won ? 0x1a5a1a : 0x5a1a1a);
+    panG.fillRoundedRect(bx-240, by-130, 480, 300, 22);
+    panG.lineStyle(4, won ? 0x44FF88 : 0xFF6644);
+    panG.strokeRoundedRect(bx-240, by-130, 480, 300, 22);
+
+    // Icon + title
+    const icon = won ? '🎉' : Phaser.Utils.Array.GetRandom(['😱','💩','🌭','🚀']);
+    this.add.text(bx, by-108, icon, { fontSize: '52px' }).setOrigin(0.5).setDepth(202);
+
+    const msg = won
+      ? CONTENT.winTitle
+      : Phaser.Utils.Array.GetRandom(CONTENT.failMsgs);
+
+    this.add.text(bx, by-48, msg, {
+      fontSize: '20px', fontFamily: 'Fredoka One, Arial Black',
+      color: '#fff', stroke: '#000', strokeThickness: 3,
+      align: 'center', wordWrap: { width: 420 }, lineSpacing: 6
+    }).setOrigin(0.5).setDepth(202);
+
+    // Score
+    const best = localStorage.getItem('hm_best');
+    this.add.text(bx, by+30, `⭐ Score: ${this.score}  🏆 Best: ${best||'---'}`, {
+      fontSize: '18px', fontFamily: 'Fredoka One', color: '#FFE135', stroke: '#000', strokeThickness: 3
+    }).setOrigin(0.5).setDepth(202);
+
+    // Stars (1-3 based on score)
+    const stars = this.score >= 400 ? 3 : this.score >= 200 ? 2 : 1;
+    const starStr = '⭐'.repeat(stars) + '☆'.repeat(3-stars);
+    this.add.text(bx, by+58, starStr, { fontSize: '30px' }).setOrigin(0.5).setDepth(202);
+
+    // Yuken tip (win only)
+    if (won) {
+      this.add.text(bx, by+90, CONTENT.winHint, {
+        fontSize: '11px', fontFamily: 'Arial', color: '#aaddff',
+        align: 'center', wordWrap: { width: 420 }
+      }).setOrigin(0.5).setDepth(202);
+    }
+
+    // Buttons
+    this._endBtn(bx-65, by+138, 120, 38, 0xFF4444, won?'🔄 Again':'💪 Retry', () => {
+      this.cameras.main.fadeOut(300);
+      this.time.delayedCall(300, () => this.scene.restart());
+    }, 202);
+    this._endBtn(bx+75, by+138, 120, 38, 0x226699, '🏠 Menu', () => {
+      this.cameras.main.fadeOut(300);
+      this.time.delayedCall(300, () => this.scene.start('MenuScene'));
+    }, 202);
+  }
+
+  _endBtn(cx, cy, bw, bh, col, label, cb, depth) {
+    const g = this.add.graphics().setDepth(depth);
+    g.fillStyle(col); g.fillRoundedRect(cx-bw/2, cy-bh/2, bw, bh, 10);
+    g.lineStyle(3, 0x000); g.strokeRoundedRect(cx-bw/2, cy-bh/2, bw, bh, 10);
+    this.add.text(cx, cy, label, {
+      fontSize: '17px', fontFamily: 'Fredoka One', color: '#fff', stroke: '#000', strokeThickness: 2
+    }).setOrigin(0.5).setDepth(depth+1);
+    const hit = this.add.rectangle(cx, cy, bw, bh).setInteractive().setAlpha(0.001).setDepth(depth+2);
+    hit.on('pointerdown', cb);
+  }
+
+  /* ── PARTICLES ───────────────────────────────────────── */
+  _spawnExplosion(x, y, count, emojis) {
+    for (let i=0; i<count; i++) {
+      const e = this.add.text(x, y, Phaser.Utils.Array.GetRandom(emojis), { fontSize: '22px' }).setOrigin(0.5).setDepth(80);
+      const ang = Math.random()*Math.PI*2, spd = 70+Math.random()*110;
+      this.tweens.add({
+        targets: e,
+        x: x + Math.cos(ang)*spd,
+        y: y + Math.sin(ang)*spd,
+        alpha: 0, scaleX: 1.8, scaleY: 1.8,
+        duration: 700+Math.random()*300,
+        delay: i*50,
+        onComplete: () => e.destroy()
+      });
+    }
+  }
+
+  _spawnCelebration() {
+    const emojis = ['🎉','⭐','🌟','✨','🎊','😸','🏆'];
+    for (let i=0; i<28; i++) {
+      this.time.delayedCall(i*70, () => {
+        const e = this.add.text(
+          Phaser.Math.Between(80, W-80),
+          Phaser.Math.Between(30, H/2),
+          Phaser.Utils.Array.GetRandom(emojis),
+          { fontSize: (24+Math.random()*14)+'px' }
+        ).setDepth(85);
+        this.tweens.add({ targets: e, y: e.y-90, alpha: 0, scaleX: 1.4, scaleY: 1.4, duration: 1100+Math.random()*500, onComplete: () => e.destroy() });
+      });
+    }
+  }
+
+  /* ── TOAST ───────────────────────────────────────────── */
+  _toast(msg, dur, col) {
+    if (this._toastObj) { this._toastObj.destroy(); if(this._toastBg)this._toastBg.destroy(); }
+    const bg = this.add.graphics().setDepth(95);
+    bg.fillStyle(0x000000, 0.72); bg.fillRoundedRect(W/2-200, H/2-80, 400, 60, 14);
+    const t = this.add.text(W/2, H/2-50, msg, {
+      fontSize: '15px', fontFamily: 'Fredoka One', color: col||'#FFE135',
+      stroke: '#000', strokeThickness: 3, align: 'center', lineSpacing: 4
+    }).setOrigin(0.5).setDepth(96);
+    this._toastBg = bg; this._toastObj = t;
+    this.tweens.add({ targets: [bg, t], alpha: 0, duration: 400, delay: dur-400, onComplete: () => { bg.destroy(); t.destroy(); } });
+  }
+
+  /* ── PRESSURE BAR ─────────────────────────────────────── */
+  _updatePressureBar(p) {
+    const bx0=60, bW=W-120, pH=H-40;
+    this.pressureFill.clear();
+    if (p <= 0) return;
+    const fill = bW*(p/100);
+    let col;
+    if (p < 33) col = 0x4488FF;
+    else if (p < 66) col = 0x22CC55;
+    else col = 0xFF4444;
+    // Pulsing alpha when in zone
+    const alpha = p>=33 && p<66 ? 0.9+Math.sin(Date.now()*0.015)*0.1 : 1;
+    this.pressureFill.fillStyle(col, alpha);
+    this.pressureFill.fillRoundedRect(bx0, pH-12, fill, 24, 12);
+    // Shine
+    this.pressureFill.fillStyle(0xffffff, 0.15);
+    this.pressureFill.fillRoundedRect(bx0, pH-12, fill, 10, 6);
+  }
+
+  /* ── UPDATE ──────────────────────────────────────────── */
+  update(time, delta) {
+    // Clouds
+    this.clouds.forEach(c => {
+      c.g.x -= c.spd * delta/1000;
+      if (c.g.x < -100) c.g.x = W+80;
+    });
+
+    // Crane swing
+    this.craneAng += this.craneDir * 0.007;
+    if (this.craneAng > 0.45) this.craneDir = -1;
+    if (this.craneAng < -0.45) this.craneDir = 1;
+    this._drawCrane();
+
+    // Businessman sway
+    this.hangContainer.x = this.hangX + Math.sin(time*0.0009)*14;
+
+    // Fans
+    this._updateFans(delta);
+
+    // Birds
+    this._updateBirds(delta);
+
+    // Charging mechanics
+    if (this.isCharging && !this.launched) {
+      this.pressure = Math.min(100, this.pressure + 1.1);
+      this._updatePressureBar(this.pressure);
+      this._drawMachine(this.pressure);
+
+      // Machine shake
+      const sh = (this.pressure/100)*4;
+      this.machineG.x = Phaser.Math.Between(-sh, sh);
+      this.machineG.y = Phaser.Math.Between(-sh, sh);
+
+      // Arrow preview
+      this.arrowG.clear();
+      const p = this.pressure;
+      let vx,vy;
+      if (p<33){vx=150+p*4;vy=-(80+p*3);}
+      else if(p<66){const t=(p-33)/33;vx=370+t*90;vy=-(220+t*60);}
+      else{const t=(p-66)/34;vx=460+t*280;vy=-(280+t*200);}
+      // Show trajectory dots
+      this.arrowG.fillStyle(0xffffff, 0.35);
+      for (let step=1; step<=8; step++) {
+        const t2 = step*0.12;
+        const px = this.launchX + vx*t2;
+        const py = this.launchY + vy*t2 + 0.5*300*t2*t2;
+        if (px>0&&px<W&&py>0&&py<H) {
+          const r = Math.max(1, 5-step*0.4);
+          this.arrowG.fillCircle(px, py, r);
+        }
+      }
+    }
+
+    // Pod in flight
+    if (this.pod && this.launched && !this.gameOver) {
+      this.airtime += delta;
+
+      // Rotate pod with velocity direction
+      const vx = this.pod.body.velocity.x, vy = this.pod.body.velocity.y;
+      this.pod.angle = Math.atan2(vy, vx) * 180/Math.PI * 0.5;
+
+      // Trail
+      this.trailPts.push({ x: this.pod.x, y: this.pod.y });
+      if (this.trailPts.length > 14) this.trailPts.shift();
+      this.trailG.clear();
+      this.trailPts.forEach((pt, i) => {
+        const a = (i/this.trailPts.length)*0.3;
+        this.trailG.fillStyle(0x88CCFF, a);
+        this.trailG.fillCircle(pt.x, pt.y, 3 - i*0.15);
+      });
+
+      // Billboard
+      this._checkBillboard();
+
+      // Out of bounds
+      this._checkOutOfBounds();
+
+      // Slow-moving on ground (friction stop)
+      if (this.pod.body.blocked.down) {
+        this.pod.body.velocity.x *= 0.88;
+        if (Math.abs(this.pod.body.velocity.x) < 15 && !this.gameOver) {
+          this.gameOver = true;
+          this.physics.pause();
+          this._spawnExplosion(this.pod.x, this.pod.y, 5, ['💥','🌭','😂']);
+          this.pod.setText('💥');
+          this.time.delayedCall(700, () => this._showEndPanel(false));
+        }
+      }
+    }
+  }
+}
+
+/* ────────────────────── PHASER CONFIG ─────────────────── */
+const config = {
+  type: Phaser.AUTO,
+  parent: 'game',
+  width: W,
+  height: H,
+  scale: {
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+  },
+  physics: {
+    default: 'arcade',
+    arcade: { gravity: { y: 300 }, debug: false }
+  },
+  scene: [MenuScene, GameScene],
+  backgroundColor: '#87CEEB',
 };
 
-/* ═══════════════════════════════════════════════════════════
-   QUESTIONS  ← Edit these to change quiz content
-   { f: Force(N), a: Area(cm²), p: Pressure(answer), wrong: [w1,w2], hint }
-═══════════════════════════════════════════════════════════ */
-const QS = [
-  { f:10,  a:2,  p:5,  wrong:[3,8],  hint:"10 ÷ 2 = ?" },
-  { f:24,  a:4,  p:6,  wrong:[10,3], hint:"24 ÷ 4 = ?" },
-  { f:40,  a:8,  p:5,  wrong:[6,4],  hint:"40 ÷ 8 = ?" },
-  { f:70,  a:10, p:7,  wrong:[5,9],  hint:"70 ÷ 10 = ?" },
-  { f:90,  a:9,  p:10, wrong:[15,7], hint:"90 ÷ 9 = ?" },
-];
-
-/* ═══════════════════════════════════════════════════════════
-   STATE
-═══════════════════════════════════════════════════════════ */
-let lang='en', qIdx=0, lives=3, score=0, phase='title', answered=false;
-let timerTO=null, hintTO=null;
-
-/* ─── HELPERS ────────────────────────────────────────────── */
-const $  = id => document.getElementById(id);
-const rnd = (arr) => arr[Math.floor(Math.random()*arr.length)];
-
-function showScreen(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  $('s-'+id).classList.add('active');
-}
-
-/* ─── TITLE INIT ────────────────────────────────────────── */
-$('btn-en').onclick = ()=>startGame('en');
-$('btn-ja').onclick = ()=>startGame('ja');
-
-/* Spawn drifting clouds on title */
-(()=>{
-  const emojis=['☁️','🌤️','⛅','☁️'];
-  const title=$('s-title');
-  for(let i=0;i<5;i++){
-    const el=document.createElement('div');
-    el.style.cssText=`position:absolute;font-size:${2+Math.random()*1.5}rem;
-      top:${4+i*11}%;animation:cloudMove ${10+i*3}s linear infinite;
-      animation-delay:${-i*2.5}s;z-index:1;`;
-    el.textContent=emojis[i%emojis.length];
-    title.appendChild(el);
-  }
-})();
-
-/* ─── START GAME ────────────────────────────────────────── */
-function startGame(l){
-  lang=l; qIdx=0; lives=3; score=0; phase='racing';
-  answered=false;
-  $('q-num').textContent='1';
-  $('score-num').textContent='0';
-  $('prog-fill').style.width='0%';
-  $('prog-kart').style.left='0%';
-  updateLives();
-  $('fluffy-lbl').textContent=C[lang].fluffyLbl;
-  $('fluffy-emoji').textContent='🐱';
-  $('fluffy').classList.remove('celebrating');
-  buildWorld();
-  showScreen('race');
-  // First question after short intro
-  setTimeout(()=>{ if(phase==='racing') openQuestion(); }, 2200);
-}
-
-/* ─── BUILD RACE WORLD ──────────────────────────────────── */
-function buildWorld(){
-  const world=$('world');
-  world.querySelectorAll('.cloud,.tree,.sign').forEach(e=>e.remove());
-  $('spark-layer').innerHTML='';
-
-  // Dashes
-  const dt=$('dtrack'); dt.innerHTML='';
-  for(let i=0;i<32;i++){ const d=document.createElement('div'); d.className='dash'; dt.appendChild(d); }
-
-  // Clouds
-  const clouds=['☁️','🌤️','⛅','☁️','☁️'];
-  for(let i=0;i<5;i++){
-    const el=document.createElement('div');
-    el.className='cloud';
-    el.style.cssText=`top:${3+Math.random()*28}%;font-size:${1.8+Math.random()*1.8}rem;
-      animation-duration:${9+Math.random()*9}s;animation-delay:${-Math.random()*12}s;`;
-    el.textContent=clouds[i];
-    world.appendChild(el);
-  }
-
-  // Trees above road
-  const treeTop=['🌳','🌴','🌵','🎋'];
-  for(let i=0;i<10;i++){
-    const el=document.createElement('div');
-    el.className='tree hi';
-    el.style.cssText=`font-size:${2.2+Math.random()*1}rem;
-      animation-duration:${4+Math.random()*4}s;animation-delay:${-Math.random()*8}s;`;
-    el.textContent=treeTop[i%treeTop.length];
-    world.appendChild(el);
-  }
-
-  // Trees below road
-  const treeBot=['🌲','🌴','🌻','🌸'];
-  for(let i=0;i<10;i++){
-    const el=document.createElement('div');
-    el.className='tree lo';
-    el.style.cssText=`font-size:${2+Math.random()*1}rem;
-      animation-duration:${4+Math.random()*4}s;animation-delay:${-Math.random()*8}s;`;
-    el.textContent=treeBot[i%treeBot.length];
-    world.appendChild(el);
-  }
-
-  // Yuken signs
-  const signTexts=['⚙️ YUKEN','P = F ÷ A','💧 PASCAL','🔩 YUKEN'];
-  for(let i=0;i<4;i++){
-    const wrap=document.createElement('div');
-    wrap.className='sign';
-    wrap.style.cssText=`animation-duration:${6+i*1.5}s;animation-delay:${-i*2}s;`;
-    const pole=document.createElement('div'); pole.className='sign-pole';
-    const inner=document.createElement('div'); inner.className='sign-inner';
-    inner.textContent=signTexts[i%signTexts.length];
-    wrap.appendChild(inner); wrap.appendChild(pole);
-    world.appendChild(wrap);
-  }
-}
-
-/* ─── HUD ───────────────────────────────────────────────── */
-function updateLives(){
-  $('lives-el').textContent='❤️'.repeat(lives)+'🖤'.repeat(Math.max(0,3-lives));
-}
-function updateProgress(){
-  const pct=Math.round((qIdx/QS.length)*100);
-  $('prog-fill').style.width=pct+'%';
-  $('prog-kart').style.left=Math.max(0,pct-2)+'%';
-  $('q-num').textContent=Math.min(qIdx+1,QS.length);
-  $('score-num').textContent=score;
-}
-
-/* ─── OPEN QUESTION ─────────────────────────────────────── */
-function openQuestion(){
-  if(phase!=='racing') return;
-  if(qIdx>=QS.length){ finishRace(true); return; }
-  phase='question'; answered=false;
-
-  const q=QS[qIdx]; const c=C[lang];
-
-  // Panel content
-  $('qhdr').textContent=c.qHdr[qIdx%c.qHdr.length];
-  $('qhdr').style.background=['#06B6D4','#F97316','#A855F7','#EC4899','#22C55E'][qIdx%5];
-  $('qvals').textContent=`Force (F) = ${q.f} N   |   Area (A) = ${q.a} cm²`;
-  $('qbig').innerHTML=`P = ${q.f} ÷ ${q.a} = <span style="color:var(--coral)">?</span>`;
-  $('qask').textContent=c.qAsk;
-  $('qhint').textContent=''; $('qhint').classList.remove('show');
-
-  // Shuffle answers
-  const opts=[{v:q.p,ok:true},{v:q.wrong[0],ok:false},{v:q.wrong[1],ok:false}]
-    .sort(()=>Math.random()-.5);
-  const container=$('qopts'); container.innerHTML='';
-  opts.forEach(o=>{
-    const btn=document.createElement('button');
-    btn.className='qbtn';
-    btn.textContent=o.v+' '+c.unit;
-    btn.onclick=()=>pick(o.ok,btn,q);
-    container.appendChild(btn);
-  });
-
-  // Slow road during question
-  $('dashes').classList.remove('fast'); $('dashes').classList.add('slow');
-
-  // Show panel
-  const p=$('qpanel'); p.classList.add('open');
-  $('backdrop').style.display='block';
-  requestAnimationFrame(()=>requestAnimationFrame(()=>p.classList.add('show')));
-
-  // Timer 8s
-  const bar=$('qtimer');
-  bar.style.transition='none'; bar.style.width='100%';
-  bar.offsetWidth; // reflow
-  bar.style.transition='width 8s linear'; bar.style.width='0%';
-
-  hintTO=setTimeout(()=>{
-    if(answered) return;
-    $('qhint').textContent=c.hintPre+q.hint; $('qhint').classList.add('show');
-  },4000);
-
-  timerTO=setTimeout(()=>{
-    if(!answered) pick(false,null,q,true);
-  },8000);
-}
-
-/* ─── PICK ANSWER ───────────────────────────────────────── */
-function pick(ok,btn,q,timeout=false){
-  if(answered) return;
-  answered=true;
-  clearTimeout(timerTO); clearTimeout(hintTO);
-  document.querySelectorAll('.qbtn').forEach(b=>b.disabled=true);
-
-  if(ok){ onRight(btn); }
-  else   { onWrong(btn,q); }
-}
-
-function onRight(btn){
-  if(btn){ btn.classList.add('ok'); btn.textContent='✅ '+btn.textContent; }
-
-  score+=100;
-  updateProgress();
-
-  // Flash + sparks
-  const flash=$('flash'); flash.classList.remove('go');
-  flash.offsetWidth; flash.classList.add('go');
-  setTimeout(()=>flash.classList.remove('go'),700);
-  spawnSparks();
-
-  // Boost message toast
-  showToast(rnd(C[lang].correct),'var(--green)');
-
-  // Close panel after celebration
-  setTimeout(()=>{
-    closePanel();
-    qIdx++;
-    updateProgress();
-    if(qIdx>=QS.length){
-      $('fluffy').classList.add('celebrating');
-      $('fluffy-emoji').textContent='😸';
-      setTimeout(()=>finishRace(true),900);
-    } else {
-      phase='racing';
-      boostKart();
-      $('dashes').classList.remove('slow'); $('dashes').classList.add('fast');
-      setTimeout(()=>$('dashes').classList.remove('fast'),1800);
-      setTimeout(()=>{ if(phase==='racing') openQuestion(); },3200);
-    }
-  },1000);
-}
-
-function onWrong(btn,q,timeout=false){
-  if(btn){ btn.classList.add('no'); }
-  lives=Math.max(0,lives-1); updateLives();
-
-  $('kart').classList.remove('shaking');
-  $('kart').offsetWidth;
-  $('kart').classList.add('shaking');
-  setTimeout(()=>$('kart').classList.remove('shaking'),500);
-
-  const c=C[lang];
-  showToast(rnd(c.wrong),'var(--coral)');
-  $('qhint').textContent=c.hintPre+q.hint; $('qhint').classList.add('show');
-
-  if(lives<=0){
-    setTimeout(()=>{ closePanel(); finishRace(false); },1500);
-    return;
-  }
-
-  // Re-enable for retry
-  setTimeout(()=>{
-    answered=false;
-    document.querySelectorAll('.qbtn').forEach(b=>{b.disabled=false;b.classList.remove('no','ok');});
-    const bar=$('qtimer');
-    bar.style.transition='none'; bar.style.width='100%';
-    bar.offsetWidth;
-    bar.style.transition='width 6s linear'; bar.style.width='0%';
-    clearTimeout(timerTO);
-    timerTO=setTimeout(()=>{ if(!answered) pick(false,null,q,true); },6000);
-  },800);
-}
-
-function closePanel(){
-  const p=$('qpanel');
-  p.classList.remove('show');
-  $('backdrop').style.display='none';
-  $('dashes').classList.remove('slow');
-  setTimeout(()=>p.classList.remove('open'),350);
-}
-
-/* ─── KART BOOST ────────────────────────────────────────── */
-function boostKart(){
-  const k=$('kart'); k.classList.add('boosting');
-  for(let i=0;i<8;i++) setTimeout(spawnSpeedLine,i*80);
-  setTimeout(()=>k.classList.remove('boosting'),1400);
-}
-function spawnSpeedLine(){
-  const k=$('kart'), w=$('world');
-  const kr=k.getBoundingClientRect(), wr=w.getBoundingClientRect();
-  const el=document.createElement('div');
-  el.className='speedline';
-  el.style.cssText=`left:${kr.left-wr.left+8}px;top:${kr.top-wr.top+10+Math.random()*28}px;`;
-  w.appendChild(el);
-  setTimeout(()=>el.remove(),350);
-}
-
-/* ─── SPARKS / TOAST ────────────────────────────────────── */
-function spawnSparks(){
-  const sparks=['⭐','✨','🌟','💫','⚡','🎉'];
-  const p=$('qpanel'), pr=p.getBoundingClientRect();
-  for(let i=0;i<10;i++){
-    const el=document.createElement('div');
-    el.className='spark';
-    el.textContent=rnd(sparks);
-    el.style.cssText=`font-size:${1+Math.random()*1.2}rem;
-      left:${pr.left+Math.random()*pr.width}px;
-      top:${pr.top+Math.random()*pr.height}px;
-      animation-delay:${Math.random()*.3}s;`;
-    document.body.appendChild(el);
-    setTimeout(()=>el.remove(),900);
-  }
-}
-
-let toastTO=null;
-function showToast(msg,bg){
-  let t=document.getElementById('toast');
-  if(!t){
-    t=document.createElement('div'); t.id='toast';
-    t.style.cssText=`position:fixed;top:80px;left:50%;transform:translateX(-50%);
-      z-index:500;font-family:'Fredoka One',sans-serif;font-size:1.3rem;color:white;
-      border:3px solid #1C1C1E;border-radius:20px;padding:10px 22px;
-      box-shadow:4px 4px 0 #1C1C1E;transition:opacity .3s,transform .3s;white-space:nowrap;`;
-    document.body.appendChild(t);
-  }
-  t.textContent=msg; t.style.background=bg;
-  t.style.opacity='1'; t.style.transform='translateX(-50%) scale(1)';
-  clearTimeout(toastTO);
-  toastTO=setTimeout(()=>{
-    t.style.opacity='0'; t.style.transform='translateX(-50%) scale(.8)';
-  },1200);
-}
-
-/* ─── FINISH ────────────────────────────────────────────── */
-function finishRace(won){
-  phase=won?'win':'lose';
-  if(won){
-    $('prog-fill').style.width='100%';
-    $('prog-kart').style.left='98%';
-    setTimeout(()=>{
-      showScreen('win');
-      $('w-title').textContent=C[lang].winTitle;
-      $('w-sub').textContent=C[lang].winSub;
-      $('w-score').textContent=score;
-      $('w-lesson').innerHTML=C[lang].winLesson.replace(/\n/g,'<br>');
-      spawnConfetti();
-    },700);
-  } else {
-    setTimeout(()=>{
-      showScreen('lose');
-      $('l-title').textContent=C[lang].loseTitle;
-      $('l-hint').innerHTML=C[lang].loseHint.replace(/\n/g,'<br>');
-    },400);
-  }
-}
-
-function spawnConfetti(){
-  const colors=['#FFE135','#FF6B6B','#06B6D4','#22C55E','#F97316','#A855F7','#EC4899'];
-  const emojis=['⭐','🎊','🎉','✨','🌟','😸'];
-  for(let i=0;i<60;i++){
-    const el=document.createElement('div');
-    el.className='confetti';
-    const isEmoji=Math.random()>.45;
-    el.textContent=isEmoji?rnd(emojis):'●';
-    el.style.cssText=`
-      left:${Math.random()*100}vw;top:-20px;
-      font-size:${isEmoji?(1+Math.random()*.8)+'rem':(6+Math.random()*10)+'px'};
-      color:${colors[Math.floor(Math.random()*colors.length)]};
-      animation-duration:${2+Math.random()*3}s;
-      animation-delay:${Math.random()*1.5}s;`;
-    document.body.appendChild(el);
-    setTimeout(()=>el.remove(),5500);
-  }
-}
-
-function resetGame(){
-  clearTimeout(timerTO); clearTimeout(hintTO);
-  phase='title';
-  showScreen('title');
-}
+new Phaser.Game(config);
 </script>
 </body>
 </html>
