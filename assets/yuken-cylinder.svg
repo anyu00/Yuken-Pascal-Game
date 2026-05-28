@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80">
+  <rect x="8"  y="25" width="48" height="30" rx="4" fill="#1a0a2e" stroke="#c440ff" stroke-width="2"/>
+  <rect x="2"  y="33" width="12" height="14" rx="3" fill="#2a1a3a" stroke="#c440ff" stroke-width="1.5"/>
+  <rect x="56" y="30" width="20" height="6"  rx="2" fill="#c440ff"/>
+  <rect x="56" y="44" width="20" height="6"  rx="2" fill="#c440ff"/>
+  <circle cx="32" cy="40" r="8" fill="none" stroke="#c440ff" stroke-width="2"/>
+  <text x="40" y="72" text-anchor="middle" font-family="Arial" font-size="7" fill="#c440ff">CYLINDER</text>
+</svg>

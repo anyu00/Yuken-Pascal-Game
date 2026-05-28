@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Pascal's Law — Yuken</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- ─── GLOBAL HEADER ───────────────────────────────────────── -->
+<header class="game-header" id="game-header">
+  <a href="#" id="brand-logo-link" target="_blank" rel="noopener" class="brand-logo-wrap">
+    <img id="brand-logo-img" src="assets/yuken-logo.svg"
+         onerror="this.style.display='none'" alt="Yuken" />
+    <span class="brand-name">Yuken</span>
+  </a>
+  <div class="header-center">
+    <span class="brand-tagline" id="brand-tagline">Hydraulics for Life</span>
+  </div>
+  <button class="lang-btn" id="lang-btn">🇯🇵 日本語</button>
+</header>
+
+<!-- ─── SCREEN: MENU ────────────────────────────────────────── -->
+<section class="screen active" id="screen-menu">
+  <div class="menu-wrap">
+    <div class="title-block">
+      <div class="title-hero">
+        <span class="title-p">P</span><span class="title-eq"> = </span>
+        <span class="title-f">F</span><span class="title-div">÷</span>
+        <span class="title-a">A</span>
+      </div>
+      <h1 class="game-title">Pascal's Law</h1>
+      <p class="game-subtitle">
+        Save Yukentopia from <strong class="villain-text">SQUISH</strong>
+        &amp; master hydraulics!
+      </p>
+    </div>
+
+    <div class="menu-characters">
+      <div class="menu-char pascal-idle" id="menu-pascal">
+        <div class="menu-char-emoji">🧑‍🔬</div>
+        <div class="menu-char-name">Pascal</div>
+      </div>
+      <div class="menu-vs">VS</div>
+      <div class="menu-char squish-idle" id="menu-squish">
+        <div class="menu-char-emoji">🫧</div>
+        <div class="menu-char-name villain-text">SQUISH</div>
+      </div>
+    </div>
+
+    <div class="menu-buttons">
+      <button class="btn-primary" id="btn-start" data-key="startBtn">
+        🚀 Start the Adventure!
+      </button>
+      <button class="btn-secondary" id="btn-sim-only" data-key="tryBtn">
+        🔬 Jump to Lab
+      </button>
+    </div>
+
+    <div class="menu-footer">
+      <span data-key="poweredBy">Powered by</span>
+      <a id="menu-brand-link" href="#" target="_blank" rel="noopener" class="menu-brand-link">
+        <img id="menu-logo-sm" src="assets/yuken-logo.svg"
+             onerror="this.style.display='none'" alt="Yuken" />
+        <strong>Yuken</strong>
+      </a>
+    </div>
+  </div>
+
+  <!-- Floating particles background -->
+  <div class="particles" id="particles"></div>
+</section>
+
+<!-- ─── SCREEN: STORY ────────────────────────────────────────── -->
+<section class="screen" id="screen-story">
+  <div class="story-wrap">
+
+    <!-- Scene progress dots -->
+    <div class="story-progress-bar">
+      <div class="story-dots" id="story-dots"></div>
+      <button class="btn-skip" id="btn-skip-story" data-key="skipStory">
+        Skip Story →
+      </button>
+    </div>
+
+    <!-- Scene title -->
+    <div class="story-scene-title" id="story-scene-title">Scene Title</div>
+
+    <!-- Scene background icon -->
+    <div class="scene-bg-icon" id="scene-bg-icon">🏙️</div>
+
+    <!-- Character stage -->
+    <div class="character-stage" id="character-stage">
+      <!-- Characters rendered here by story.js -->
+    </div>
+
+    <!-- Speech bubble -->
+    <div class="speech-bubble-wrap">
+      <div class="speech-speaker" id="story-speaker-name">Pascal</div>
+      <div class="speech-bubble">
+        <p class="speech-text" id="story-speech">…</p>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <button class="btn-next-line" id="btn-next-line">Next →</button>
+
+  </div>
+</section>
+
+<!-- ─── SCREEN: SIMULATOR ────────────────────────────────────── -->
+<section class="screen" id="screen-simulator">
+  <div class="sim-wrap">
+
+    <div class="sim-header">
+      <h1 class="sim-title" data-key="simulatorTitle">🔬 Pascal's Lab</h1>
+      <p class="sim-sub" data-key="simulatorSub">Pick an experiment and try it yourself!</p>
+    </div>
+
+    <!-- Demo cards grid -->
+    <div id="demos-grid-wrap" style="display:flex;flex-direction:column;align-items:center;width:100%;">
+      <div class="demos-grid" id="demos-grid">
+        <!-- Rendered by simulator.js -->
+      </div>
+
+      <!-- Brand products strip -->
+      <div class="brand-strip">
+        <p class="brand-strip-label" data-key="poweredBy">Powered by</p>
+        <div class="brand-products" id="brand-products">
+          <!-- Rendered by simulator.js -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Active demo panel (hidden by default) -->
+    <div class="demo-panel" id="demo-panel" style="display:none;">
+      <!-- Filled dynamically -->
+    </div>
+
+    <!-- Back to demos -->
+    <button class="btn-back" id="btn-back-demos" style="display:none;"
+            data-key="backBtn">← Back</button>
+
+  </div>
+</section>
+
+<!-- ─── SCRIPT ───────────────────────────────────────────────── -->
+<script type="module">
+  import { BRAND }         from './js/content.js';
+  import { applyLang }     from './js/lang.js';
+  import { initStory }     from './js/story.js';
+  import { initSimulator } from './js/simulator.js';
+
+  // Wire brand logo/link
+  const logoLink  = document.getElementById('brand-logo-link');
+  const menuLink  = document.getElementById('menu-brand-link');
+  const logoImg   = document.getElementById('brand-logo-img');
+  const menuLogoSm = document.getElementById('menu-logo-sm');
+  if (logoLink)  logoLink.href  = BRAND.logoLink;
+  if (menuLink)  menuLink.href  = BRAND.logoLink;
+  if (logoImg)   logoImg.src    = BRAND.logoSrc;
+  if (menuLogoSm) menuLogoSm.src = BRAND.logoSrc;
+
+  // Screen router
+  function show(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + id).classList.add('active');
+
+    // Show back btn only in simulator when demo is open
+    const backBtn = document.getElementById('btn-back-demos');
+    if (backBtn) backBtn.style.display = id === 'simulator' ? 'block' : 'none';
+  }
+
+  // Floating particles on menu
+  function spawnParticles() {
+    const layer = document.getElementById('particles');
+    if (!layer) return;
+    const symbols = ['P','F','A','÷','=','💧','⚙️','🔩'];
+    setInterval(() => {
+      const el = document.createElement('div');
+      el.className = 'particle';
+      el.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+      el.style.left = `${Math.random() * 100}vw`;
+      el.style.animationDuration = `${6 + Math.random() * 8}s`;
+      el.style.fontSize = `${0.8 + Math.random() * 1.2}rem`;
+      layer.appendChild(el);
+      setTimeout(() => el.remove(), 14000);
+    }, 700);
+  }
+
+  // Init
+  document.addEventListener('DOMContentLoaded', () => {
+    spawnParticles();
+    applyLang();
+
+    // Init story + simulator
+    initStory(() => show('simulator'));
+    initSimulator();
+
+    // Menu buttons
+    document.getElementById('btn-start').addEventListener('click', () => show('story'));
+    document.getElementById('btn-sim-only').addEventListener('click', () => show('simulator'));
+  });
+</script>
+
+</body>
+</html>

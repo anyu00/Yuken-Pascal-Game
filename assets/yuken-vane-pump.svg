@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80">
+  <circle cx="40" cy="40" r="36" fill="#0a2e1a" stroke="#00ff88" stroke-width="2"/>
+  <ellipse cx="40" cy="40" rx="20" ry="20" fill="none" stroke="#00ff88" stroke-width="2"/>
+  <ellipse cx="40" cy="40" rx="8" ry="8" fill="#00ff88"/>
+  <rect x="58" y="34" width="14" height="12" rx="3" fill="#1a4a2a" stroke="#00ff88" stroke-width="1.5"/>
+  <text x="40" y="72" text-anchor="middle" font-family="Arial" font-size="8" fill="#00ff88">VANE PUMP</text>
+</svg>
